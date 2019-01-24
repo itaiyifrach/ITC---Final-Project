@@ -1,9 +1,8 @@
 `include processor.v
 `include bmp_arbiter.v
 
-`COLOR_SIZE 8
 
-module image_processing_acclerator(
+module image_processing_acclerator (
 	clk,
 	rst_n,
 	slv0_mode,
@@ -21,7 +20,6 @@ module image_processing_acclerator(
 	mstr0_data,
 	mstr0_data_valid
 	);
-	
 	
   parameter DATA_WIDTH = 32;
   
@@ -49,38 +47,48 @@ module image_processing_acclerator(
   output wire [DATA_WIDTH-1:0] 		mstr0_data;
   output [1:0]						mstr0_data_valid;
   
-
-  // init the arbiter processor
+  // internal variables
+  wire [DATA_WIDTH-1:0]				data_to_processor;
+  wire 								valid_to_processor;
+  wire 								done_to_processor;
+  wire [DATA_WIDTH-1:0]				data_to_arbiter;
+  
+  
+  
+  
+  // create the arbiter
   bmp_arbiter #(DATA_BUS_SIZE = DATA_WIDTH) arbiter (
-    .clk			(clk),
+	.clk					(clk),
+	.rst_n					(rst_n),
+	.slv0_mode				(slv0_mode),
+	.slv0_data_valid		(slv0_data_valid),
+	.slv0_proc_val			(slv0_proc_val),
+	.slv0_data				(slv0_data),
+	.slv0_rdy				(slv0_rdy),
+	.slv1_mode				(slv1_mode),
+	.slv1_data_valid		(slv1_data_valid), 
+	.slv1_proc_val			(slv1_proc_val),
+	.slv1_data				(slv1_data),
+	.slv1_rdy				(slv1_rdy),
+	.mstr0_ready			(mstr0_rdy),
+	.data_to_processor		(data_to_processor),
+	.data_to_master			(mstr0_data),
+	.valid					(valid_to_processor),
+	.done					(done_to_processor)
+	);
+  
+  // create the processor
+  processor #(DATA_WIDTH = DATA_WIDTH) processor (
+	.clk			(clk),
     .rst_n			(rst_n),
-    .vld			(threshold_vld),
-    .last_data		(last_data),
+    .vld			(valid_to_processor),
+    //.last_data		(done_to_processor),
     .mode			(mode),
     .proc_val		(proc_val),
-    .data_in		(data_in),
-    .data_out		(threshold_out),
-    .data_out_rdy	(data_out_rdy)
-  );
-  
-  // init the brightness processor
-  brightness_processor #(DATA_WIDTH) b (
-    .clk			(clk),
-    .rst_n			(rst_n),
-    .vld			(brightness_vld),
-    .mode			(mode),
-    .proc_val		(proc_val),
-    .data_in		(data_in),
-    .data_out		(brightness_out),
-    .data_out_rdy	(data_out_rdy)
-  );
-  
+    .data_in		(data_to_processor),
+    .data_out		(data_to_arbiter)
+	);
+	
 
-  // sending valid to the desired processor
-  assign threshold_vld = (vld & !mode[1] & mode[0]) ? 1 : 0;	// if mode = 2'b01
-  assign brightness_vld = (vld & mode[1] & !mode[0]) ? 1 : 0;	// if mode = 2'b10
-  
-  // outputing the data from the desired processor
-  assign data_out = mode[1] ? brightness_out : threshold_out;
-
-endmodule : processor
+	
+endmodule : image_processing_acclerator
