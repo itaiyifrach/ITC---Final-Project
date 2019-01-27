@@ -83,10 +83,10 @@ module scheduler
 	
 /////FiFo Shit////////
 	input wire 							empty;
-	input reg [DATA_BUS_SIZE - 1:0] 	data_from_fifo;
+	input reg  [DATA_BUS_SIZE - 1:0] 	data_from_fifo;
 	input								full;
 	
-	output reg [DATA_BUS_SIZE - 1:0] 	data_to_fifo;
+	output [DATA_BUS_SIZE - 1:0] 		data_to_fifo;
 	output reg 							fifo_rd;
 	output reg 							fifo_wr;
 
@@ -116,30 +116,18 @@ module scheduler
 	////////Who's the chosen slave /////////
 	assign whos_grt 		= (slv0_data_valid && (slv0_mode != 2'b00) && (slv0_mode != 2'b11))? 2'b00 :(slv1_data_valid && ((slv1_mode != 2'b00) && (slv1_mode != 2'b11 )))? 2'b01 : 2'b10;
 	///////Give it to the processor/////////
-	assign mode 			= (whos_grt == 2'b00)? slv0_mode:(whos_grt == 2'b01)? slv1_mode : 2'b00;
-	assign data_proc 		= (whos_grt == 2'b00)? slv0_data_proc:(whos_grt == 2'b01)? slv1_data_proc : 8'b0;
-	assign data				= (whos_grt == 2'b00)? slv0_mode:(whos_grt == 2'b01)? slv1_mode : 2'b00;
-	
-	////////Get The FiFo Instance/////////////	
-		FiFo fDUT 
-	(
-		.clk(clk), 
-		.rst(rst_n), 
-		.rd(fifo_rd), 
-		.wr(fifo_wr), 
-		.data_in(data_to_fifo), 
-		.data_out(data_from_fifo), 
-		.full(full), 
-		.empt(empty)
-	);
-	
+	assign mode 				= (whos_grt == 2'b00)? slv0_mode : (whos_grt == 2'b01)? slv1_mode : 2'b00;
+	assign data_proc 			= (whos_grt == 2'b00)? slv0_data_proc : (whos_grt == 2'b01)? slv1_data_proc : 8'b0;
+	assign data					= (whos_grt == 2'b00)? slv0_data : (whos_grt == 2'b01)? slv1_data : 2'b00;
+	assign data_to_processor	= data;
+	assign scheduler_2_proc_vld = ((mstr_ready) && (!rst_n) && (mode == 2'b01) && (BMPcount > 56))? 'b1 : 'b0;
 	////////Get The FiFo Wired/////////////
-	assign data_to_fifo = ((BMPcount > 0) && (BMPcount < 56))? data : (vld_pr)? data_from_processor : data;
+	assign data_to_fifo = ((BMPcount >= 0) && (BMPcount < 56))? data : (vld_pr)? data_from_processor : data;
 	
 	// FiFo's wr is on from first input msg till end of last msg of the processor (on TH mode)
 	assign fifo_wr 			= (((!rst_n) && (mode == 2'b01) && (BMPcount < 56) && (mode != 2'b10) )||(vld_pr))? 'b1:'b0;
 	// FiFo's rd is on from #DEAD_TIME after end of headers (on TH mode) till FiFo empty
-	assign fifo_rd 			= ((mstr_ready) && (!rst_n) && (mode == 2'b01) && (BMPcount > 53) && (!empty))? 'b1:'b0;
+	assign fifo_rd 			= ((mstr_ready) && (!rst_n) && (mode == 2'b01) && (BMPcount > 3 * bytes_per_data) && (!empty))? 'b1:'b0;
 	
 	/////To The Master/////
 	assign data_to_master	= (mode[1] && (BMPcount > 56))? data_from_processor : data_from_fifo;
@@ -156,7 +144,6 @@ module scheduler
 	////////reseting first!/////////
 		if (rst_n)
 			begin
-				scheduler_2_proc_vld	<= 0;
 				done 					<= 0;
 			end
 
@@ -175,9 +162,9 @@ module scheduler
 					end
 				if ((BMPcount >= 56) && (BMPcount < file_size + DEAD_TIME))						 
 					begin 
-						scheduler_2_proc_vld 	= 0;
+						//scheduler_2_proc_vld 	= 0;
 						BMPcount 				= BMPcount + 1;
-						scheduler_2_proc_vld 	= 1;
+						//scheduler_2_proc_vld 	= 1;
 					end
 				if (BMPcount == file_size + DEAD_TIME) mstr0_cmplt = 1;
 			end

@@ -30,7 +30,8 @@ module FiFo
 	
 	wire rd_en;
 	wire wr_en;
-
+	
+	wire  [Addr_Width-1:0] no_of_stored_data;
 	//reg [Addr_Width-1:0] no_of_stored_data;
 
   reg  [Data_Width-1:0]mem[2**Addr_Width-1:0];
@@ -42,7 +43,7 @@ module FiFo
 		assign empt  = (rd_addr_pos == wr_addr_pos)? 'd1:'d0;
 		assign full  = ((rd_addr_pos[Addr_Width-1:0] == wr_addr_pos[Addr_Width-1:0])&& !empt)? 'd1:'d0;
 		
-		//assign no_of_stored_data 	= wr_addr_pos[Addr_Width-1:0] - rd_addr_pos[Addr_Width-1:0];
+		assign no_of_stored_data 	= wr_addr_pos [Addr_Width-1:0] - rd_addr_pos [Addr_Width-1:0];
 		assign rd_en 				= rd && !empt;
 		assign wr_en 				= wr && !full;
 
@@ -63,13 +64,13 @@ module FiFo
 			begin				
               if (rd_en)			//Read Operation
 					begin
-						data_out 	<= mem [rd_addr_pos];
+						data_out 	<= mem [rd_addr_pos[Addr_Width-1:0]];
 						rd_addr_pos <= rd_addr_pos + 'd1;
                         
 					end
 				if (wr_en)			//Write Operation
 					begin
-						mem [wr_addr_pos] <= data_in;
+						mem [wr_addr_pos[Addr_Width-1:0]] <= data_in;
 						wr_addr_pos 	  <= wr_addr_pos + 'd1;
 					end
 			end
