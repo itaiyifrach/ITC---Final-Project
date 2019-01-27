@@ -1,5 +1,5 @@
-`include processor.v
-`include bmp_arbiterBFF.v
+`include "processor.v"
+`include "on_top_of_that.v"
 
 
 module image_processing_acclerator (
@@ -16,7 +16,7 @@ module image_processing_acclerator (
 	slv1_data,
 	slv1_rdy,
 	mstr0_cmplt,
-	mstr0_rdy,
+	mstr0_ready,
 	mstr0_data,
 	mstr0_data_valid
 	);
@@ -45,7 +45,7 @@ module image_processing_acclerator (
   output wire						mstr0_cmplt;
   input reg							mstr0_ready;
   output wire [DATA_WIDTH-1:0] 		mstr0_data;
-  output [1:0]						mstr0_data_valid;
+  output wire [1:0]					mstr0_data_valid;
   
   // internal variables
   wire [DATA_WIDTH-1:0]				data_to_processor;
@@ -53,53 +53,58 @@ module image_processing_acclerator (
   wire 								done_to_processor;
   wire [DATA_WIDTH-1:0]				data_to_arbiter;
   wire								data_vld_to_arbiter;
+  wire [1:0]						mode_to_processor;
+  wire [`COLOR_SIZE-1:0]			data_proc_to_processor;
+  
   
   
   
   
   // create the arbiter
-  bmp_arbiterBFF #(DATA_BUS_SIZE = DATA_WIDTH) arbiter (
-	.clk				(clk),
-	.rst_n				(rst_n),
-	.mode				(mode),
-	.data_proc			(data_proc),
+  bmp_arbiterBFF #(.DATA_BUS_SIZE(DATA_WIDTH)) arbiter (
+	.clk					(clk),
+	.rst_n					(rst_n),
 	
+	// slave 0
+	.slv0_mode				(slv0_mode),
+	.slv0_data_valid		(slv0_data_valid),
+	.slv0_data				(slv0_data),
+	.slv0_data_proc			(slv0_proc_val),
 	
-	.slv0_mode			(slv0_mode),
-	.slv0_data_valid	(slv0_data_valid),
-	.slv0_data			(slv0_data),
-	.slv0_data_proc		(slv0_data_proc),
+	// slave 1
+	.slv1_mode				(slv1_mode),
+	.slv1_data_valid		(slv1_data_valid), 
+	.slv1_data				(slv1_data),
+    .slv1_data_proc			(slv1_proc_val),
 	
-	.slv1_mode			(slv1_mode),
-	.slv1_data_valid	(slv1_data_valid), 
-	.slv1_data			(slv1_data),
-	.slv1_data_proc		(slv1_data_proc),
+	// master 
+	.mstr0_ready			(mstr0_ready),
+	.data_to_master			(mstr0_data),
+	.mstr0_data_valid		(mstr0_data_valid),
+    .mstr0_cmplt			(mstr0_cmplt),
 	
-	.mstr0_ready		(mstr0_ready),
-	.mstr0_data_valid	(mstr0_data_valid),
-	// complete to master??
-	
-	.data_out_pr		(data_to_arbiter),
-	.vld_pr				(data_vld_to_arbiter),
-	
-	.data_to_processor	(data_to_processor),
-	.data_to_master		(data_to_master),
-	.valid				(data_vld_to_processor),
-	.done				(done_to_processor)		// is it done to processor (i.e last_data)?
+	// processor
+	.data_to_processor		(data_to_processor),
+	.data_from_processor	(data_to_arbiter),
+	.vld_pr					(data_vld_to_arbiter),
+	.scheduler_2_proc_vld	(data_vld_to_processor),
+	.mode					(mode_to_processor),
+	.data_proc				(data_proc_to_processor),
+	.done					(done_to_processor)	
 	);
 
 	
   // create the processor
-  processor #(DATA_WIDTH = DATA_WIDTH) processor (
+  processor #(.DATA_WIDTH(DATA_WIDTH)) processor (
 	.clk			(clk),
     .rst_n			(rst_n),
-    .vld			(valid_to_processor),
+    .vld			(data_vld_to_processor),
     .last_data		(done_to_processor),
-    .mode			(mode),
-    .proc_val		(proc_val),
+    .mode			(mode_to_processor),
+    .proc_val		(data_proc_to_processor),
     .data_in		(data_to_processor),
     .data_out		(data_to_arbiter),
-	.data_out_vld	(data_vld_to_arbiter),
+	.data_out_vld	(data_vld_to_arbiter)
 	//.done			()
 	);
 	

@@ -1,8 +1,8 @@
-`include brightness_processor.v
-`include threshold_processor.v
-
 `define COLOR_SIZE 8
 `define PIXEL_SIZE 24
+
+`include "brightness_processor.v"
+`include "threshold_processor.v"
 
 /*
 -------------------------------------------------------------
@@ -62,7 +62,7 @@ module processor(clk, rst_n, vld, last_data, mode, proc_val, data_in, data_out, 
   wire							threshold_done;
 
   // init the threshold processor
-  threshold_processor #(DATA_WIDTH) threshold (
+  threshold_processor #(.DATA_WIDTH(DATA_WIDTH)) threshold (
     .clk			(clk),
     .rst_n			(rst_n),
     .vld			(threshold_vld_in),
@@ -76,7 +76,7 @@ module processor(clk, rst_n, vld, last_data, mode, proc_val, data_in, data_out, 
   );
   
   // init the brightness processor
-  brightness_processor #(DATA_WIDTH) brightness (
+  brightness_processor #(.DATA_WIDTH(DATA_WIDTH)) brightness (
     .clk			(clk),
     .rst_n			(rst_n),
     .vld			(brightness_vld_in),

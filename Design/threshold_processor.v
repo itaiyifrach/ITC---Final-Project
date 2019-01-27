@@ -139,3 +139,8 @@ module threshold_processor(clk, rst_n, vld, last_data, mode, proc_val, data_in, 
         end
       end
     end
+    // ---- END OF THRESHOLD ----
+  end
+
+  
+endmodule : threshold_processor
