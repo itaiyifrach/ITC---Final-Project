@@ -81,12 +81,12 @@ module bmp_arbiterBFF
 //////////////Wires/////////////////////////////////////
 
 	/////Scheduler-FiFo Connections//////
-	wire data_sch_Fifo;
-	wire data_FiFo_sch;
-	wire rd_sch_FiFo;
-	wire wr_sch_FiFo;
-	wire empty_FiFo_sch;
-	wire full_FiFo_sch;
+	wire [DATA_BUS_SIZE - 1:0] 	data_sch_FiFo;
+	wire [DATA_BUS_SIZE - 1:0] 	data_FiFo_sch;
+	wire 						rd_sch_FiFo;
+	wire 						wr_sch_FiFo;
+	wire 						empty_FiFo_sch;
+	wire 						full_FiFo_sch;
 
 ///////////////////Instances Of Modulim//////////////////////////////
 
@@ -124,7 +124,15 @@ module bmp_arbiterBFF
 		.mstr0_ready(mstr0_ready),
 		.data_to_master(data_to_master),
 		.mstr0_data_valid(mstr0_data_valid),
-		.mstr0_cmplt(mstr0_cmplt)
+		.mstr0_cmplt(mstr0_cmplt),
+		
+		/////Fifo/////
+		.fifo_rd(rd_sch_FiFo),
+		.fifo_wr(wr_sch_FiFo),
+		.data_to_fifo(data_sch_FiFo),
+		.data_from_fifo(data_FiFo_sch),
+		.empty(empty_FiFo_sch),
+		.full(full_FiFo_sch)
 	);
 	////////Get The FiFo Instance/////////////	
 	FiFo fDUT 
@@ -133,7 +141,7 @@ module bmp_arbiterBFF
 		.rst(rst_n), 
 		.rd(rd_sch_FiFo), 
 		.wr(wr_sch_FiFo), 
-		.data_in(data_sch_Fifo), 
+		.data_in(data_sch_FiFo), 
 		.data_out(data_FiFo_sch), 
 		.full(full_FiFo_sch), 
 		.empt(empty_FiFo_sch)
