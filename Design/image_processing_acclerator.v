@@ -9,12 +9,12 @@ module image_processing_acclerator (
 	slv0_data_valid,
 	slv0_proc_val,
 	slv0_data,
-	slv0_rdy,
+	slv0_ready,
 	slv1_mode,
 	slv1_data_valid,
 	slv1_proc_val,
 	slv1_data,
-	slv1_rdy,
+	slv1_ready,
 	mstr0_cmplt,
 	mstr0_ready,
 	mstr0_data,
@@ -32,18 +32,18 @@ module image_processing_acclerator (
   input wire						slv0_data_valid;
   input wire [`COLOR_SIZE-1:0] 		slv0_proc_val;
   input wire [DATA_WIDTH-1:0] 		slv0_data;
-  output reg 				 		slv0_rdy;
+  output wire 				 		slv0_ready;
   
   // slave 1
   input wire [1:0]					slv1_mode;
   input wire						slv1_data_valid;
   input wire [`COLOR_SIZE-1:0] 		slv1_proc_val;
   input wire [DATA_WIDTH-1:0] 		slv1_data;
-  output reg 				 		slv1_rdy;
+  output wire 				 		slv1_ready;
   
   // master
   output wire						mstr0_cmplt;
-  input reg							mstr0_ready;
+  input wire						mstr0_ready;
   output wire [DATA_WIDTH-1:0] 		mstr0_data;
   output wire [1:0]					mstr0_data_valid;
   
@@ -55,7 +55,7 @@ module image_processing_acclerator (
   wire								data_vld_to_arbiter;
   wire [1:0]						mode_to_processor;
   wire [`COLOR_SIZE-1:0]			data_proc_to_processor;
-  
+  wire								processor_done;			// might delete this
   
   
   
@@ -70,12 +70,14 @@ module image_processing_acclerator (
 	.slv0_data_valid		(slv0_data_valid),
 	.slv0_data				(slv0_data),
 	.slv0_data_proc			(slv0_proc_val),
-	
+    .slv0_ready				(slv0_ready),
+    
 	// slave 1
 	.slv1_mode				(slv1_mode),
 	.slv1_data_valid		(slv1_data_valid), 
 	.slv1_data				(slv1_data),
     .slv1_data_proc			(slv1_proc_val),
+    .slv1_ready				(slv1_ready),
 	
 	// master 
 	.mstr0_ready			(mstr0_ready),
@@ -104,8 +106,8 @@ module image_processing_acclerator (
     .proc_val		(data_proc_to_processor),
     .data_in		(data_to_processor),
     .data_out		(data_to_arbiter),
-	.data_out_vld	(data_vld_to_arbiter)
-	//.done			()
+    .data_out_vld	(data_vld_to_arbiter),
+    .done			(processor_done)			// might delete this
 	);
 	
 	

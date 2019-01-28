@@ -46,6 +46,12 @@ module scheduler
 		mstr0_cmplt,
 	);
 	
+  /////Parameters/////
+  	parameter DEBUG 		= 0;
+  	parameter DATA_BUS_SIZE = 32;
+	parameter DEAD_TIME = 3;
+  
+  
 /////Universe Shit/////
 	input clk;
 	input rst_n;

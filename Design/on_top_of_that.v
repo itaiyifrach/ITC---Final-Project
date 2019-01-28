@@ -38,6 +38,9 @@ module bmp_arbiterBFF
 		mstr0_cmplt,
 		);
 
+  /////Parameters/////
+  parameter DATA_BUS_SIZE = 32;
+  
 ////////////////I/O////////////////
 
 	input clk;
@@ -75,8 +78,8 @@ module bmp_arbiterBFF
 	input 								mstr0_ready;
 	
 	output [DATA_BUS_SIZE - 1:0] 		data_to_master;	
-	output 								mstr0_data_valid;
-	output reg							mstr0_cmplt;	
+  output [1:0]							mstr0_data_valid;
+  output reg 							mstr0_cmplt;	
 	
 //////////////Wires/////////////////////////////////////
 
