@@ -78,8 +78,13 @@ module bmp_arbiterBFF
 	input 								mstr0_ready;
 	
 	output [DATA_BUS_SIZE - 1:0] 		data_to_master;	
+<<<<<<< HEAD
   output [1:0]							mstr0_data_valid;
   output reg 							mstr0_cmplt;	
+=======
+	output [1:0]						mstr0_data_valid;
+	output reg							mstr0_cmplt;	
+>>>>>>> 95464077824c9e1a0b9be8713db7c518ee2fd9b9
 	
 //////////////Wires/////////////////////////////////////
 
