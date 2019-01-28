@@ -95,7 +95,7 @@ module scheduler
 	input 								mstr0_ready;
 	
 	output [DATA_BUS_SIZE - 1:0] 		data_to_master;	
-	output 								mstr0_data_valid;
+	output reg [1:0]					mstr0_data_valid;
 	output reg							mstr0_cmplt;
 
 
@@ -131,6 +131,7 @@ module scheduler
 	
 	/////To The Master/////
 	assign data_to_master	= (mode[1] && (BMPcount > 56))? data_from_processor : data_from_fifo;
+	assign mstr0_data_valid = ((mstr_ready) && (!rst_n) && (mode == 2'b01) && (BMPcount > 3 * bytes_per_data))? {whos_grt[0], 1'b1} : 'b0;
 	/////// Whats going on in your head???//////
 	assign file_size 		= {BMP[5], BMP[4], BMP[3], BMP[2]};
 	assign mstr_ready 		= (slv0_data_valid || slv1_data_valid)? mstr0_ready:'b0; //if nothing is valid, dont do it	
