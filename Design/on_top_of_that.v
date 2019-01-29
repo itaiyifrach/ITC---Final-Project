@@ -37,10 +37,8 @@ module bmp_arbiterBFF
 		mstr0_data_valid,
 		mstr0_cmplt,
 		);
+	parameter DATA_BUS_SIZE = 32;
 
-  /////Parameters/////
-  parameter DATA_BUS_SIZE = 32;
-  
 ////////////////I/O////////////////
 
 	input clk;

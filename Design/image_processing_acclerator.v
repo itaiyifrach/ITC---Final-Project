@@ -1,6 +1,8 @@
 `include "processor.v"
 `include "on_top_of_that.v"
 
+`define COLOR_SIZE 8
+`define PIXEL_SIZE 24
 
 module image_processing_acclerator (
 	clk,
@@ -22,7 +24,7 @@ module image_processing_acclerator (
 	);
 	
   parameter DATA_WIDTH = 32;
-  
+  //parameter DATA_BUS_SIZE = 32;
   // set inputs and outputs
   input wire						clk;
   input wire						rst_n;

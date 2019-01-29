@@ -28,7 +28,8 @@ This module calculates threshold of given pixels.
 
 -------------------------------------------------------------
 */
-
+`define COLOR_SIZE 8
+`define PIXEL_SIZE 24
 
 module threshold_processor(clk, rst_n, vld, last_data, mode, proc_val, data_in, data_out, data_out_vld, done); 
   parameter DATA_WIDTH = 32;

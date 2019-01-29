@@ -1,6 +1,4 @@
-parameter DEBUG 		= 0;
-parameter DATA_BUS_SIZE = 32;
-parameter DEAD_TIME = 3;
+
 
 module scheduler
 	(
@@ -46,12 +44,10 @@ module scheduler
 		mstr0_cmplt,
 	);
 	
-  /////Parameters/////
-  	parameter DEBUG 		= 0;
-  	parameter DATA_BUS_SIZE = 32;
+	parameter DEBUG 		= 0;
+	parameter DATA_BUS_SIZE = 32;
 	parameter DEAD_TIME = 3;
-  
-  
+	
 /////Universe Shit/////
 	input clk;
 	input rst_n;
@@ -126,18 +122,18 @@ module scheduler
 	assign data_proc 			= (whos_grt == 2'b00)? slv0_data_proc : (whos_grt == 2'b01)? slv1_data_proc : 8'b0;
 	assign data					= (whos_grt == 2'b00)? slv0_data : (whos_grt == 2'b01)? slv1_data : 2'b00;
 	assign data_to_processor	= data;
-	assign scheduler_2_proc_vld = ((mstr_ready) && (!rst_n) && (mode == 2'b01) && (BMPcount > 56))? 'b1 : 'b0;
+	assign scheduler_2_proc_vld = ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > 56))? 'b1 : 'b0;
 	////////Get The FiFo Wired/////////////
 	assign data_to_fifo = ((BMPcount >= 0) && (BMPcount < 56))? data : (vld_pr)? data_from_processor : data;
 	
 	// FiFo's wr is on from first input msg till end of last msg of the processor (on TH mode)
-	assign fifo_wr 			= (((!rst_n) && (mode == 2'b01) && (BMPcount < 56) && (mode != 2'b10) )||(vld_pr))? 'b1:'b0;
+	assign fifo_wr 			= (((rst_n) && (mode == 2'b01) && (BMPcount < 56) && (mode != 2'b10) )||(vld_pr))? 'b1:'b0;
 	// FiFo's rd is on from #DEAD_TIME after end of headers (on TH mode) till FiFo empty
-	assign fifo_rd 			= ((mstr_ready) && (!rst_n) && (mode == 2'b01) && (BMPcount > 3 * bytes_per_data) && (!empty))? 'b1:'b0;
+	assign fifo_rd 			= ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > 3 * bytes_per_data) && (!empty))? 'b1:'b0;
 	
 	/////To The Master/////
 	assign data_to_master	= (mode[1] && (BMPcount > 56))? data_from_processor : data_from_fifo;
-	assign mstr0_data_valid = ((mstr_ready) && (!rst_n) && (mode == 2'b01) && (BMPcount > 3 * bytes_per_data))? {whos_grt[0], 1'b1} : 'b0;
+	assign mstr0_data_valid = ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > 3 * bytes_per_data))? {whos_grt[0], 1'b1} : 'b0;
 	/////// Whats going on in your head???//////
 	assign file_size 		= {BMP[5], BMP[4], BMP[3], BMP[2]};
 	assign mstr_ready 		= (slv0_data_valid || slv1_data_valid)? mstr0_ready:'b0; //if nothing is valid, dont do it	
@@ -146,15 +142,15 @@ module scheduler
 	
 ///////////////////////////////////////////////////////////////////////////////	
 	
-	always @(posedge clk, posedge rst_n)
+	always @(posedge clk, negedge rst_n)
 	begin
 	////////reseting first!/////////
-		if (rst_n)
+		if (!rst_n)
 			begin
 				done 					<= 0;
 			end
 
-		if (mstr_ready && !rst_n)
+		if (mstr_ready && rst_n)
 			begin
 				if (BMPcount < 56) 
 					begin

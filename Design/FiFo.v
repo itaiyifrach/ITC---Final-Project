@@ -34,23 +34,23 @@ module FiFo
 	wire  [Addr_Width-1:0] no_of_stored_data;
 	//reg [Addr_Width-1:0] no_of_stored_data;
 
-  reg  [Data_Width-1:0]mem[2**Addr_Width-1:0];
-  reg  [Addr_Width:0]rd_addr_pos 	= 'd0; //pos values is to detect empty/full condition
-  reg  [Addr_Width:0]wr_addr_pos 	= 'd0; //pos values is to detect empty/full condition
+    reg  [Data_Width-1:0]mem[2**Addr_Width-1:0];
+    reg  [Addr_Width:0]rd_addr_pos 	= 'd0;
+    reg  [Addr_Width:0]wr_addr_pos 	= 'd0;
 
-  integer i;
+    integer i;
 
-		assign empt  = (rd_addr_pos == wr_addr_pos)? 'd1:'d0;
-		assign full  = ((rd_addr_pos[Addr_Width-1:0] == wr_addr_pos[Addr_Width-1:0])&& !empt)? 'd1:'d0;
-		
-		assign no_of_stored_data 	= wr_addr_pos [Addr_Width-1:0] - rd_addr_pos [Addr_Width-1:0];
-		assign rd_en 				= rd && !empt;
-		assign wr_en 				= wr && !full;
+	assign empt  = (rd_addr_pos == wr_addr_pos)? 'd1:'d0;
+	assign full  = ((rd_addr_pos[Addr_Width-1:0] == wr_addr_pos[Addr_Width-1:0])&& !empt)? 'd1:'d0;
+	
+	assign no_of_stored_data 	= (wr_addr_pos [Addr_Width-1:0] - rd_addr_pos [Addr_Width-1:0])%8;
+	assign rd_en 				= rd && !empt;
+	assign wr_en 				= wr && !full;
 
       
 	always@(posedge clk, posedge rst)
 	begin
-		if (rst)
+		if (!rst)
 			begin
 				data_out 	<= 'd0;
 				rd_addr_pos <= 0;
