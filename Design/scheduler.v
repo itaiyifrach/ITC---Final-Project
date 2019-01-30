@@ -24,7 +24,6 @@ module scheduler
 		data_from_processor,
 		vld_pr,
 		scheduler_2_proc_vld,
-		//no_of_last_padded_bytes,
 		mode,
 		data_proc,
 		done,
@@ -47,7 +46,7 @@ module scheduler
 	parameter DEBUG 		= 0;
 	parameter DATA_BUS_SIZE = 32;
 	parameter DEAD_TIME = 3;
-	
+	parameter BYTE = 8;
 /////Universe Shit/////
 	input clk;
 	input rst_n;
@@ -122,8 +121,8 @@ module scheduler
 	assign data_proc 			= (whos_grt == 2'b00)? slv0_data_proc : (whos_grt == 2'b01)? slv1_data_proc : 8'b0;
 	assign data					= (whos_grt == 2'b00)? slv0_data : (whos_grt == 2'b01)? slv1_data : 2'b00;
 	assign data_to_processor	= data;
-	assign scheduler_2_proc_vld = ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > 56))? 'b1 : 'b0;
-	
+	//assign scheduler_2_proc_vld = ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > 56))? 'b1 : 'b0;
+	assign scheduler_2_proc_vld = ((mstr_ready) && (rst_n) && (BMPcount >= 56))? 'b1 : 'b0;
 	////////Get The FiFo Wired/////////////
 	assign data_to_fifo = ((BMPcount >= 0) && (BMPcount < 56))? data : (vld_pr)? data_from_processor : data;
 	
@@ -158,7 +157,7 @@ module scheduler
 						counter = 0;
 						while (counter < bytes_per_data)//This while loop is for extracting input data byte by byte
 							begin
-								BMP[BMPcount] 		= data [counter * bytes_per_data +: 8];
+								BMP[BMPcount] 		= data [(counter * BYTE) +: BYTE];
 								if (DEBUG) $display("BMP[%d] = %h\n", BMPcount, BMP[BMPcount]);
 								BMPcount 			= BMPcount + 1;
 								counter 			= counter + 1;
