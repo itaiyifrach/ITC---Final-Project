@@ -123,6 +123,7 @@ module scheduler
 	assign data					= (whos_grt == 2'b00)? slv0_data : (whos_grt == 2'b01)? slv1_data : 2'b00;
 	assign data_to_processor	= data;
 	assign scheduler_2_proc_vld = ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > 56))? 'b1 : 'b0;
+	
 	////////Get The FiFo Wired/////////////
 	assign data_to_fifo = ((BMPcount >= 0) && (BMPcount < 56))? data : (vld_pr)? data_from_processor : data;
 	
@@ -166,7 +167,7 @@ module scheduler
 				if ((BMPcount >= 56) && (BMPcount < file_size + DEAD_TIME))						 
 					begin 
 						//scheduler_2_proc_vld 	= 0;
-						BMPcount 				= BMPcount + 1;
+						BMPcount 				= BMPcount + 4;
 						//scheduler_2_proc_vld 	= 1;
 					end
 				if (BMPcount == file_size + DEAD_TIME) mstr0_cmplt = 1;

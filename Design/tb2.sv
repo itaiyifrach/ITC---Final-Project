@@ -1,9 +1,9 @@
 `include "image_processing_acclerator.v"
 
-module test;
+module test2;
   
-    parameter DATA_WIDTH 	= 32;
-  	parameter DEBUG			= 0 ;
+    parameter DATA_WIDTH = 32;
+  	parameter DEBUG			= 1 ;
 	parameter PERIOD 		= 10;
 	parameter DATA_BUS_SIZE = 32;
 	parameter BYTE			= 8;
@@ -14,7 +14,7 @@ module test;
   logic [1:0] 				slv0_mode;
   logic 					slv0_data_valid;
   logic [`COLOR_SIZE-1:0] 	slv0_proc_val;
-  reg [DATA_WIDTH-1:0] 	slv0_data;
+  logic [DATA_WIDTH-1:0] 	slv0_data;
   logic 					slv0_ready;
   logic [1:0] 				slv1_mode;
   logic 					slv1_data_valid;
@@ -35,19 +35,19 @@ module test;
 	integer 	 BMPcount 		= 'b0;
 	integer 	 file_size, data_start_pos, p_width, p_height;
 	reg [15:0] 	 p_biBitCount;
-	reg [7:0] 	 bmp_data [BMP_ARRAY_LEN-1:0];
+	logic [7:0] 	 bmp_data [BMP_ARRAY_LEN-1:0];
 	//reg [7:0] 	 bmp_data [0:BMP_ARRAY_LEN-1];
 
 	
 	initial
 		begin
-			slv0_mode = 2'b01;
+			slv0_mode = 2'b10;
 			if (DEBUG) $display("Loading bmp file!\n");
 			$readmemh("C:/Users/Abu Tony/Desktop/X/ITC---Final-Project/Design/export.txt", bmp_data);
-
+			//#0;
 		    file_size <= {bmp_data[5], bmp_data[4], bmp_data[3], bmp_data[2]};
 			$display("file size is %d", file_size);
-					
+			 #10		;
 					
 			data_start_pos 	<= {bmp_data[13], bmp_data[12], bmp_data[11], bmp_data[10]};
 			if (DEBUG) $display("data_start_pos = %d\n", data_start_pos);
@@ -61,7 +61,6 @@ module test;
 			p_biBitCount 	<= {bmp_data[29], bmp_data[28]};
 			if (DEBUG) $display("p_biBitCount = %d\n", p_biBitCount);
 			//	end
-			//slv0_data = {bmp_data[3], bmp_data[2], bmp_data[1], bmp_data[0]};
 		end
 			
   
@@ -75,6 +74,11 @@ module test;
    	#5 clk = ~clk;
   end
   
+/*   initial begin
+    rst_n = 1;
+    #7 rst_n = ~rst_n;
+    #7 rst_n = ~rst_n;
+  end */
   
   // create the DUT
   image_processing_acclerator #(.DATA_WIDTH(DATA_WIDTH)) img_proc_acc (
@@ -99,6 +103,7 @@ module test;
   initial begin
     #150 $finish;
   end
+
 	
 	//Reset Logic
 	event reset_trigger;
@@ -126,27 +131,28 @@ module test;
 	//Verification Plan
 	initial 
 	begin
-	#5;
 
 	->reset_trigger;
+	#10
 	@(reset_done_trigger)
 	if (DEBUG) $display ("Oh my god, its starting");
 	slv0_data_valid = 'b1;
-	while (BMPcount < file_size)
-		@(negedge clk) //write 
+	end
+	
+	always 
+		@(negedge clk) 
+		begin			
+		if (BMPcount < file_size)
 		begin
 			counter = 0;
 			//slv0_data_valid = 'b0;
 			while (counter < bytes_per_data)
 				begin
 					//slv0_data = {bmp_data[3], bmp_data[2], bmp_data[1], bmp_data[0]};
+
+					slv0_data [(counter * BYTE) +: BYTE] <= bmp_data[BMPcount];
 					if (DEBUG) $display ("Byte no %d is : %h", BMPcount, bmp_data[BMPcount]);
-
-					slv0_data [(counter * BYTE) +: BYTE] = bmp_data[BMPcount];
-					if (DEBUG) $display ("(counter * BYTE) = %d", (counter * BYTE));
-					if (DEBUG) $display ("And yet, This what the DUT got in this round: %h", slv0_data[(counter * BYTE) +: 8]);
-
-					if (DEBUG) $display ("Again...Byte no %d is : %h", BMPcount, bmp_data[BMPcount]);
+					if (DEBUG) $display ("This what the DUT got in this round: %h", slv0_data[(counter * BYTE) +: 8]);
 
 					BMPcount 			= BMPcount + 1;
 					counter 			= counter + 1;
