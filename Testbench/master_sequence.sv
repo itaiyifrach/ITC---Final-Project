@@ -9,7 +9,7 @@ class master_sequence extends uvm_sequence#(master_transaction);
   
 
   task body;
-    master_sequence req;
+    master_transaction req;
     repeat(10)
     begin
       req = master_transaction::type_id::create("req");

@@ -9,8 +9,7 @@ class slave_transaction extends uvm_sequence_item;
   rand logic 						rdy;
   rand logic						data_valid_stop;
   rand int							data_valid_stop_for;
-  image 							image;
-  
+  image 							img;
   
   
   constraint stops_con {
@@ -21,19 +20,18 @@ class slave_transaction extends uvm_sequence_item;
     super.new(name);
     
     // generating the images
-    image = image::create(`DATA_WIDTH);
+    img = image::create(`DATA_WIDTH);
     
   endfunction : new
+  
   
   function void print(int id);
     $display("\n ---- Slave %0d ----",	id);
     $display("mode = %0b", 		mode);
     $display("proc_val = %0b", 	proc_val);
-    $display("rdy = %0b", 			rdy);
+    $display("rdy = %0b", 		rdy);
     $display("proc_val = %0b", 	data_valid_stop);
-    $display("rdy = %0b", 			data_valid_stop_for);
-    
-    
+    $display("rdy = %0b", 		data_valid_stop_for);
   endfunction : print
   
 endclass

@@ -1,5 +1,6 @@
 `include "exp_monitor.sv"
 
+
 class passive_agent extends uvm_agent;
   
   `uvm_component_utils(passive_agent)
@@ -15,7 +16,7 @@ class passive_agent extends uvm_agent;
   
   function void build_phase(uvm_phase phase);
 	//aport = new("aport", this);
-	exp_monitor_h = exp_monitor_h::type_id::create("exp_monitor_h", this);
+	exp_monitor_h = exp_monitor::type_id::create("exp_monitor_h", this);
   endfunction
   
   

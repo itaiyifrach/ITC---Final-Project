@@ -1,6 +1,7 @@
 `include "active_agent.sv"
 `include "passive_agent.sv"
-`include "subscriber.sv"
+`include "scoreboard.sv"
+
 
 class env extends uvm_env;
   
@@ -10,14 +11,14 @@ class env extends uvm_env;
   passive_agent passive_agent_h;
   scoreboard scoreboard_h;
 
-  uvm_tlm_fifo#(my_transaction) expected_fifo;
-  uvm_tlm_fifo#(my_transaction) actual_fifo;
+  uvm_tlm_fifo#(full_transaction) expected_fifo;
+  uvm_tlm_fifo#(full_transaction) actual_fifo;
 
   
   function new(string name, uvm_component parent);
     super.new(name, parent);
-	expected_fifo = new("expected_fifo", this);
-    actual_fifo = new("actual_fifo", this);
+	expected_fifo 	= new("expected_fifo", this);
+    actual_fifo 	= new("actual_fifo", this);
   endfunction
 
   

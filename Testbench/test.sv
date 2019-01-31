@@ -2,6 +2,7 @@
 `include "slave_sequence.sv"
 `include "master_sequence.sv"
 
+
 class test extends uvm_test;
   
   `uvm_component_utils(test)
@@ -25,7 +26,7 @@ class test extends uvm_test;
     
     slv0_seq = slave_sequence::type_id::create("slv0_seq");
     slv1_seq = slave_sequence::type_id::create("slv1_seq");
-    mstr0_seq = slave_sequence::type_id::create("mstr0_seq");
+    mstr0_seq = master_sequence::type_id::create("mstr0_seq");
     
     // starting slave0 sequence
     if (!slv0_seq.randomize())

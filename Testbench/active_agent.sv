@@ -19,7 +19,7 @@ class active_agent extends uvm_agent;
   slave_driver 		slv1_drv;
   
   // master
-  master_sequencer 	msrt0_seq;
+  master_sequencer 	mstr0_seq;
   master_driver	 	mstr0_drv;
   
   // monitor
@@ -33,20 +33,20 @@ class active_agent extends uvm_agent;
   
   function void build_phase(uvm_phase phase);
 	//aport = new("aport", this);
-    slv0_seq = sequencer::type_id::create("slv0_seq", this);
-    slv0_drv = driver::type_id::create("slv0_drv", this);
-    slv1_seq = sequencer::type_id::create("slv0_seq", this);
-    slv1_drv = driver::type_id::create("slv0_drv", this);
-    msrt0_seq = sequencer::type_id::create("msrt0_seq", this);
-    mstr0_drv = driver::type_id::create("mstr0_drv", this);
-	monitor_h = monitor_h::type_id::create("monitor_h", this);
+    slv0_seq 	= slave_sequencer::type_id::create("slv0_seq", this);
+    slv0_drv 	= slave_driver::type_id::create("slv0_drv", this);
+    slv1_seq 	= slave_sequencer::type_id::create("slv1_seq", this);
+    slv1_drv 	= slave_driver::type_id::create("slv1_drv", this);
+    mstr0_seq 	= master_sequencer::type_id::create("msrt0_seq", this);
+    mstr0_drv 	= master_driver::type_id::create("mstr0_drv", this);
+	monitor_h 	= monitor::type_id::create("monitor_h", this);
   endfunction
   
   
   function void connect_phase(uvm_phase phase);
     slv0_drv.seq_item_port.connect(slv0_seq.seq_item_export);	// connect slave0 seq to it's driver
     slv1_drv.seq_item_port.connect(slv1_seq.seq_item_export);	// connect slave1 seq to it's driver
-    mstr0_drv.seq_item_port.connect(msrt0_seq.seq_item_export);	// connect master seq to it's driver
+    mstr0_drv.seq_item_port.connect(mstr0_seq.seq_item_export);	// connect master seq to it's driver
 	//my_monitor_h.aport.connect(aport);							// connect monitor to port (for scoreboard use)
   endfunction
   

@@ -2,11 +2,12 @@ class slave_driver extends uvm_driver#(slave_transaction);
   
   `uvm_component_utils(slave_driver)
   
-  virtual dut_if dut_vi;
-  
+  virtual dut_if 	dut_vi;
+  int 				slave_id;
   
   function new(string name, uvm_component parent);
     super.new(name, parent);
+    this.slave_id = (name == "slv0_drv") ? 0 : 1;
   endfunction
   
   
@@ -17,25 +18,61 @@ class slave_driver extends uvm_driver#(slave_transaction);
   
       
   task run_phase(uvm_phase phase);
-
+    logic 	data_ptr[][];					// header and pixels array pointer
+    int 	data_idx;						// header and pixels index (which data to drive every clk)
+    int 	hdr_size, pxls_size;			// header and pixels array size
+    bit 	done_with_hdr, done_with_pxls, granted;
+    logic 	[`DATA_WIDTH-1:0]	data_in;
+    
     forever begin
       // get next transaction
       seq_item_port.get_next_item(req);
       
-      // determine if the slaves supposed to get granted
-      slv0_to_be_granted = (req.slv0_mode == 2'b01 || req.slv0_mode == 2'b10) ? 1 : 0;
-      slv1_to_be_granted = (req.slv0_mode == 2'b01 || req.slv0_mode == 2'b10) ? 1 : 0;
-      master_num_of_cmplts = slv0_to_be_granted + slv1_to_be_granted;
+      // set helpful variables
+      data_idx			 	= 0;
+      done_with_hdr			= 0;
+      done_with_pxls		= 0;
+      granted				= 0;
+      hdr_size 				= $size(req.img.header);
+      pxls_size 			= $size(req.img.pixels);
       
-      @(posedge dut_vi.clk);
-      dut_vi.slv0_mode			= req.slv0_mode;
-      //dut_vi.slv0_data_valid;
-      dut_vi.slv0_proc_val		= req.slv0_proc_val;
-      dut_vi.slv1_mode			= req.slv1_mode;
-      //dut_vi.slv0_data_valid;
-      dut_vi.slv1_proc_val		= req.slv1_proc_val;
-      dut_vi.mstr0_ready		= mstr0_ready;
-      
+		
+      //always @(posedge dut_vi.clk) begin
+      while (!done_with_pxls) begin
+        /*if (done_with_pxls) begin
+          disable transaction_driver;
+        end*/
+        @(posedge dut_vi.clk) begin
+        if (slave_id == 1) dut_vi.slv1_mode	= req.mode; else dut_vi.slv0_mode = req.mode;
+        if (slave_id == 1) dut_vi.slv1_proc_val	= req.proc_val; else dut_vi.slv0_proc_val = req.proc_val;
+        granted = (slave_id == 0 && dut_vi.slv0_rdy) || (slave_id == 1 && dut_vi.slv1_rdy);
+        
+        // if granted, then start driving the image
+        if (granted) begin
+          if (slave_id == 1) dut_vi.slv1_data_valid = 1; else dut_vi.slv0_data_valid = 1;	// set valid up
+          data_ptr = done_with_hdr ? req.img.pixels : req.img.header;
+          
+          // read next image data
+          for (int i=0; i<`DATA_WIDTH; i++) begin
+            data_in[i] = data_ptr[data_idx][`DATA_WIDTH-i-1];
+          end
+          
+          // now drive it and increment data_idx
+          if (slave_id == 1) dut_vi.slv1_data = data_in; else dut_vi.slv1_data = data_in;
+          data_idx++;
+          
+          // checker if done to drive the header and pixels
+          if (!done_with_hdr && data_idx == hdr_size) begin
+          	done_with_hdr 	= 1;
+            data_idx 		= 0;
+          end
+          if (done_with_hdr && data_idx == pxls_size) begin
+          	done_with_pxls 	= 1;
+            data_idx 		= 0;
+          end
+        end
+        end
+      end	// end of always block
       
       seq_item_port.item_done();
     end

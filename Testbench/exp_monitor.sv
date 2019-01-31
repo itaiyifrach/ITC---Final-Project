@@ -8,6 +8,7 @@ class exp_monitor extends uvm_monitor;
 	
   function new(string name, uvm_component parent);
     super.new(name, parent);
+    put_port = new("put_port", this);
   endfunction
 
   function void build_phase(uvm_phase phase);
@@ -18,9 +19,9 @@ class exp_monitor extends uvm_monitor;
 
   task run_phase(uvm_phase phase);
     forever begin
-      my_transaction tx;
+      full_transaction tx;
       @(posedge dut_vi.clk);
-      tx = my_transaction::type_id::create("tx");
+      tx = full_transaction::type_id::create("tx");
       // slave 0
       tx.slv0_mode			= dut_vi.slv0_mode;
       tx.slv0_data_valid	= dut_vi.slv0_data_valid;
@@ -33,7 +34,7 @@ class exp_monitor extends uvm_monitor;
       tx.slv1_data 			= dut_vi.slv1_data;
       // master
       tx.mstr0_ready 		= dut_vi.mstr0_ready;
-      my_put_port.get(tx);
+      put_port.get(tx);
     end
   endtask
     
