@@ -1,6 +1,6 @@
-class sequence extends uvm_sequence#(my_transaction);
+class master_sequence extends uvm_sequence#(master_transaction);
   
-  `uvm_object_utils(sequence)
+  `uvm_object_utils(master_sequence)
   
   
   function new(string name="");
@@ -9,10 +9,10 @@ class sequence extends uvm_sequence#(my_transaction);
   
 
   task body;
-    my_transaction req;
-    repeat(1)
+    master_sequence req;
+    repeat(10)
     begin
-      req = my_transaction::type_id::create("req");
+      req = master_transaction::type_id::create("req");
       start_item(req);
       if(!req.randomize())
         `uvm_error("", "req randomize failed")

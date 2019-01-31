@@ -1,10 +1,10 @@
-class scoreboard extends uvm_scoreboard#(my_transaction);
+class scoreboard extends uvm_scoreboard#(full_transaction);
   
   `uvm_component_utils(scoreboard)
   //uvm_analysis_imp#(my_transaction, my_scoreboard) scb_actual;
   //uvm_analysis_imp#(my_transaction, my_scoreboard) scb_expected;
-	uvm_blocking_get_port #(my_transaction) expected_get_port;
-	uvm_blocking_get_port #(my_transaction) actual_get_port;
+  uvm_blocking_get_port #(full_transaction) expected_get_port;
+  uvm_blocking_get_port #(full_transaction) actual_get_port;
   
   logic [7:0] exp_count;
   
@@ -19,13 +19,12 @@ class scoreboard extends uvm_scoreboard#(my_transaction);
 	//scb_expected = new(my_transaction, this);
 	expected_get_port = new("expected_get_port", this);
 	actual_get_port = new("actual_get_port", this);
-	exp_count = 8'b0;
   endfunction
   
   
   function void run_phase(uvm_phase phase);
-	my_transaction expected_trans;
-	my_transaction actual_trans;
+	full_transaction expected_trans;
+	full_transaction actual_trans;
 	
     /*
     forever begin

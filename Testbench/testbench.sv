@@ -1,12 +1,16 @@
 `include "uvm_macros.svh"
 import uvm_pkg::*;
 `include "dut_if.sv"
-`include "my_transaction.sv"
+`include "full_transaction.sv"
+`include "master_transaction.sv"
+`include "slave_transaction.sv"
 `include "test.sv"
 `include "image_processing_accelerator.v"
 
 
 module testbench;
+  
+  localparam DATA_WIDTH = 32;
   
   initial begin
     $dumpfile("dump.vcd");
