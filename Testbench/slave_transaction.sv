@@ -26,12 +26,12 @@ class slave_transaction extends uvm_sequence_item;
   
   
   function void print(int id);
-    $display("\n ---- Slave %0d ----",	id);
-    $display("mode = %0b", 		mode);
-    $display("proc_val = %0b", 	proc_val);
-    $display("rdy = %0b", 		rdy);
-    $display("proc_val = %0b", 	data_valid_stop);
-    $display("rdy = %0b", 		data_valid_stop_for);
+    $display("\n ---- Slave %0d ----",		id);
+    $display("mode = %0b", 					mode);
+    $display("proc_val = %0h", 				proc_val);
+    $display("rdy = %0b", 					rdy);
+    $display("data_valid_stop = %0d", 		data_valid_stop);
+    $display("data_valid_stop_for = %0d", 	data_valid_stop_for);
   endfunction : print
   
 endclass

@@ -1,18 +1,18 @@
 class exp_monitor extends uvm_monitor;
   
   `uvm_component_utils(exp_monitor)
-  //uvm_analysis_port#(my_transaction) aport;
-  uvm_blocking_put_port #(full_transaction) put_port;
+  uvm_analysis_port#(full_transaction) aport;
+  //uvm_blocking_put_port #(full_transaction) put_port;
 	
   virtual dut_if dut_vi;
 	
   function new(string name, uvm_component parent);
     super.new(name, parent);
-    put_port = new("put_port", this);
+    //put_port = new("put_port", this);
   endfunction
 
   function void build_phase(uvm_phase phase);
-    //aport = new("aport", this);
+    aport = new("aport", this);
     if (!uvm_config_db#(virtual dut_if)::get(this, "", "dut_if_db", dut_vi))
       `uvm_error("", "uvm_config_db::get failed!")
   endfunction
@@ -34,7 +34,8 @@ class exp_monitor extends uvm_monitor;
       tx.slv1_data 			= dut_vi.slv1_data;
       // master
       tx.mstr0_ready 		= dut_vi.mstr0_ready;
-      put_port.get(tx);
+      //put_port.get(tx);
+      aport.write(tx);
     end
   endtask
     

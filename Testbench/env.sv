@@ -11,14 +11,14 @@ class env extends uvm_env;
   passive_agent passive_agent_h;
   scoreboard scoreboard_h;
 
-  uvm_tlm_fifo#(full_transaction) expected_fifo;
-  uvm_tlm_fifo#(full_transaction) actual_fifo;
+  //uvm_tlm_fifo#(full_transaction) expected_fifo;
+  //uvm_tlm_fifo#(full_transaction) actual_fifo;
 
   
   function new(string name, uvm_component parent);
     super.new(name, parent);
-	expected_fifo 	= new("expected_fifo", this);
-    actual_fifo 	= new("actual_fifo", this);
+	//expected_fifo 	= new("expected_fifo", this);
+    //actual_fifo 	= new("actual_fifo", this);
   endfunction
 
   
@@ -30,12 +30,12 @@ class env extends uvm_env;
   
   
   function void connect_phase(uvm_phase phase);
-	//my_agent_h.aport.connect(my_scoreboard_h.scb_actual);
-	//my_passive_agent_h.aport.connect(my_scoreboard_h.scb_expected);
-	active_agent_h.monitor_h.put_port.connect(actual_fifo.put_export);
-	passive_agent_h.exp_monitor_h.put_port.connect(expected_fifo.put_export);
-	scoreboard_h.actual_get_port.connect(actual_fifo.get_export);
-	scoreboard_h.expected_get_port.connect(expected_fifo.get_export);
+	active_agent_h.monitor_h.aport.connect(scoreboard_h.scb_actual);
+	passive_agent_h.exp_monitor_h.aport.connect(scoreboard_h.scb_expected);
+	//active_agent_h.monitor_h.put_port.connect(actual_fifo.put_export);
+	//passive_agent_h.exp_monitor_h.put_port.connect(expected_fifo.put_export);
+	//scoreboard_h.actual_get_port.connect(actual_fifo.get_export);
+	//scoreboard_h.expected_get_port.connect(expected_fifo.get_export);
   endfunction
   
   

@@ -23,8 +23,9 @@ class master_driver extends uvm_driver#(master_transaction);
       
       @(posedge dut_vi.clk);
       dut_vi.mstr0_ready		= req.ready;
-
+	
       seq_item_port.item_done();
+      $display("master done");
     end
   endtask
   
