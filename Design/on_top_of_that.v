@@ -8,7 +8,7 @@ module bmp_arbiterBFF
 		/////universe/////
 		clk,
 		rst_n,
-		
+
 		/////slaves/////
 		slv0_mode,
 		slv0_data_valid,
@@ -45,6 +45,8 @@ module bmp_arbiterBFF
 	input rst_n;
 
 ////Slaves Shit/////
+	//input reset;
+
 	input [1:0] 				slv0_mode;
 	input 						slv0_data_valid;
 	input [DATA_BUS_SIZE - 1:0] slv0_data;
@@ -80,7 +82,7 @@ module bmp_arbiterBFF
 	output reg							mstr0_cmplt;	
 	
 //////////////Wires/////////////////////////////////////
-
+	wire reset; //reseting - outputed from schedualer when mstr0_cmplt
 	/////Scheduler-FiFo Connections//////
 	wire [DATA_BUS_SIZE - 1:0] 	data_sch_FiFo;
 	wire [DATA_BUS_SIZE - 1:0] 	data_FiFo_sch;
@@ -97,8 +99,9 @@ module bmp_arbiterBFF
 		/////universe/////
 		.clk(clk),
 		.rst_n(rst_n),
-		
+		.reset(reset),
 		/////slaves/////
+		
 		.slv0_mode(slv0_mode),
 		.slv0_data_valid(slv0_data_valid),
 		.slv0_data(slv0_data),
@@ -139,7 +142,7 @@ module bmp_arbiterBFF
 	FiFo fDUT 
 	(
 		.clk(clk), 
-		.rst(rst_n), 
+		.rst(reset), 
 		.rd(rd_sch_FiFo), 
 		.wr(wr_sch_FiFo), 
 		.data_in(data_sch_FiFo), 

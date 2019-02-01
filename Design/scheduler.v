@@ -5,6 +5,7 @@ module scheduler
 		/////universe/////
 		clk,
 		rst_n,
+		reset,
 		
 		/////slaves/////
 		slv0_mode,
@@ -51,6 +52,7 @@ module scheduler
 /////Universe Shit/////
 	input clk;
 	input rst_n;
+	output reg reset;
 	
 ////Slaves Shit/////
 	input [1:0] 				slv0_mode;
@@ -69,7 +71,7 @@ module scheduler
 /////Processor interface/////////
 	input [DATA_BUS_SIZE - 1:0] data_from_processor; //Data comming back from the processor
 	input 						vld_pr; 	 //Points that data from the processor is valid
-//	input   					rdy_pr; //
+
 
 	output reg [DATA_BUS_SIZE - 1:0] data_to_processor;
 	output reg [1:0] 				 mode;
@@ -109,12 +111,13 @@ module scheduler
 	reg  [31:0] 					file_size;
     reg  [3:0] 						counter 		= 0;
 	reg  [5:0]						bytes_per_data 	= DATA_BUS_SIZE>>3; //How many bytes are in data bus
-  reg  [25:0]						BMPcount 		= 0; 				//Count bytes being transfered
+	reg  [25:0]						BMPcount 		= 0; 				//Count bytes being transfered
 	reg  [1:0] 						whos_grt; 							//Which slave got the grant (whos_grt = 10 for neither)
-  reg  [7:0] 						BMP [0:55]; 						//Register to hold the header
+	reg  [7:0] 						BMP [55:0]; 						//Register to hold the header
 	reg 							mstr_ready;
+	//reg								reset;
 	wire [DATA_BUS_SIZE - 1:0]		data;
-	
+	reg 							rst = 0;
 	////////Who's the chosen slave /////////
 	assign whos_grt 		= (slv0_data_valid && (slv0_mode != 2'b00) && (slv0_mode != 2'b11))? 2'b00 :(slv1_data_valid && ((slv1_mode != 2'b00) && (slv1_mode != 2'b11 )))? 2'b01 : 2'b10;
 	///////Give it to the processor/////////
@@ -122,7 +125,7 @@ module scheduler
 	assign data_proc 			= (whos_grt == 2'b00)? slv0_data_proc : (whos_grt == 2'b01)? slv1_data_proc : 8'b0;
 	assign data					= (whos_grt == 2'b00)? slv0_data : (whos_grt == 2'b01)? slv1_data : 2'b00;
 	assign data_to_processor	= data;
-  assign scheduler_2_proc_vld = ((mstr_ready) && (rst_n) && (BMPcount >= 56))? 'b1 : 'b0;
+	assign scheduler_2_proc_vld = ((mstr_ready) && (rst_n) && (BMPcount >= 56))? 'b1 : 'b0;
 	////////Get The FiFo Wired/////////////
 	assign data_to_fifo = ((BMPcount >= 0) && (BMPcount < 56))? data : (vld_pr)? data_from_processor : data;
 	
@@ -136,27 +139,32 @@ module scheduler
 	assign mstr0_data_valid = ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > 3 * bytes_per_data))? {whos_grt[0], 1'b1} : 'b0;
 	/////// Whats going on in your head???//////
 	assign file_size 		= {BMP[5], BMP[4], BMP[3], BMP[2]};
+	
 	assign mstr_ready 		= (slv0_data_valid || slv1_data_valid)? mstr0_ready:'b0; //if nothing is valid, dont do it	
-	assign no_of_last_padded_bytes = (file_size - 56) % DATA_BUS_SIZE;
 	
-	
+	assign slv0_ready = (whos_grt==00 && mstr_ready);
+	assign slv1_ready = (whos_grt==01 && mstr_ready);
+	// assign no_of_last_padded_bytes = (file_size - 56) % DATA_BUS_SIZE;
+	assign reset = (mstr0_cmplt)? rst : rst_n;
+
 ///////////////////////////////////////////////////////////////////////////////	
 	
   always @(posedge clk)
 	begin
 	////////reseting first!/////////
-		if (!rst_n)
+		if (!reset)
 			begin
 				done 					<= 0;
+				mstr0_cmplt				<=0;
 			end
 
-		if (mstr_ready && rst_n)
+		if (mstr_ready && reset)
 			begin
 				if (BMPcount < 56) 
 					begin
                       for (counter = 0; counter < bytes_per_data; counter++)
 							begin
-                              BMP[BMPcount] 		= data [(3-counter) * 8 +: 8];
+                              BMP[BMPcount] 		= data [counter * 8 +: 8];
                               if (DEBUG) $display("BMP[%0d] = %0h", BMPcount, BMP[BMPcount]);
 								BMPcount 			= BMPcount + 1;
 							end	
@@ -167,7 +175,16 @@ module scheduler
 						BMPcount 				= BMPcount + 1;
 						//scheduler_2_proc_vld 	= 1;
 					end
-				if (BMPcount == file_size + DEAD_TIME) mstr0_cmplt = 1;
+				if (BMPcount >= file_size) done = 1;
+				if (BMPcount > file_size + DEAD_TIME)
+					begin
+						mstr0_cmplt = 1;
+						#1;
+						rst = 0;
+						#1;
+						rst = 1;
+					end
+
 			end
 	end
 
