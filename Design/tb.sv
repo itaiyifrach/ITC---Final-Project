@@ -8,7 +8,8 @@ module test;
 	parameter DATA_BUS_SIZE = 32;
 	parameter BYTE			= 8;
 	parameter DEAD_TIME		= 3;
-  
+    parameter MODE			= 2'b01;
+	
   logic 					clk 	= 0;
   logic 					rst_n 	= 0;
   logic [1:0] 				slv0_mode;
@@ -41,7 +42,7 @@ module test;
 	
 	initial
 		begin
-			slv0_mode = 2'b01;
+			slv0_mode = MODE;
 			if (DEBUG) $display("Loading bmp file!\n");
 			$readmemh("C:/Users/Abu Tony/Desktop/X/ITC---Final-Project/Design/export.txt", bmp_data);
 

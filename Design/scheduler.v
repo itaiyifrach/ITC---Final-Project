@@ -74,8 +74,7 @@ module scheduler
 	output reg [1:0] 				 mode;
 	output reg [7:0] 				 data_proc;
 	output reg 						 done;	//Points that Arbiter completed transfer data
-	
-	
+		
 	///////////////////TBD//////////////////
 	output reg 				 	     scheduler_2_proc_vld; //Points that data from the schedualer to the processor is valid
 	///////////////////TBD//////////////////
@@ -129,7 +128,7 @@ module scheduler
 	// FiFo's wr is on from first input msg till end of last msg of the processor (on TH mode)
 	assign fifo_wr 			= (((rst_n) && (mode == 2'b01) && (BMPcount < 56) && (mode != 2'b10) )||(vld_pr))? 'b1:'b0;
 	// FiFo's rd is on from #DEAD_TIME after end of headers (on TH mode) till FiFo empty
-	assign fifo_rd 			= ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > 3 * bytes_per_data) && (!empty))? 'b1:'b0;
+	assign fifo_rd 			= ((mstr_ready) && (rst_n) && (mode == 2'b01) && (BMPcount > (3 * bytes_per_data) + 1) && (!empty))? 'b1:'b0;
 	
 	/////To The Master/////
 	assign data_to_master	= (mode[1] && (BMPcount > 56))? data_from_processor : data_from_fifo;

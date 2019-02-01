@@ -3,8 +3,8 @@ class image;
   rand logic [31:0]	size;			// image size in bytes
   rand logic [31:0] width;			// image width in pixels
   rand logic [31:0] height;			// image width in pixels
-  logic 		header[][];		// header data
-  rand logic 	pixels[][];		// pixels data
+  logic 		header[][];			// header data
+  rand logic 	pixels[][];			// pixels data
   int bus_size;						// bus size (32 or 64)
 
   constraint size_con {
@@ -42,7 +42,7 @@ class image;
     logic [447:0] tmp_header = 448'h424d0002b8aa0000000036000000280000001b010000d20000000100180000000000e8ba0200000000000000000000000000000000000000;
     
     
-    tmp_header[447-16-:32] = size;		// set file size
+    tmp_header[447-16-:32]  = size;		// set file size
     tmp_header[447-144-:32] = width;	// set image width
     tmp_header[447-176-:32] = height;	// set image height
     
