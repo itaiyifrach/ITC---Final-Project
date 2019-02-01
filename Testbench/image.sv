@@ -3,8 +3,13 @@ class image;
   rand logic [31:0]	size;			// image size in bytes
   rand logic [31:0] width;			// image width in pixels
   rand logic [31:0] height;			// image width in pixels
+<<<<<<< HEAD
   logic 		header[][];			// header data
   rand logic 	pixels[][];			// pixels data
+=======
+  logic 			header[][];		// header data
+  rand logic 		pixels[][];		// pixels data
+>>>>>>> 22166eb63768389c628efe2ffd145cbf8db9c092
   int bus_size;						// bus size (32 or 64)
 
   constraint size_con {
