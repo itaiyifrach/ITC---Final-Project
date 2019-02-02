@@ -3,19 +3,14 @@ class image;
   rand logic [31:0]	size;			// image size in bytes
   rand logic [31:0] width;			// image width in pixels
   rand logic [31:0] height;			// image width in pixels
-<<<<<<< HEAD
-  logic 		header[][];			// header data
-  rand logic 	pixels[][];			// pixels data
-=======
   logic 			header[][];		// header data
   rand logic 		pixels[][];		// pixels data
->>>>>>> 22166eb63768389c628efe2ffd145cbf8db9c092
   int bus_size;						// bus size (32 or 64)
 
   constraint size_con {
     width  inside {[8:100]};
     height inside {[8:100]};
-    size == (width * height * 24) + 56;
+    size == (width * height * 3) + 56;
   }
   
   function new (int bus_size);
@@ -47,7 +42,7 @@ class image;
     logic [447:0] tmp_header = 448'h424d0002b8aa0000000036000000280000001b010000d20000000100180000000000e8ba0200000000000000000000000000000000000000;
     
     
-    tmp_header[447-16-:32]  = size;		// set file size
+    tmp_header[447-16-:32] = size;		// set file size
     tmp_header[447-144-:32] = width;	// set image width
     tmp_header[447-176-:32] = height;	// set image height
     
@@ -55,7 +50,7 @@ class image;
     
     for (int i=0; i<448 / bus_size; i++) begin
       for (int j=0; j<bus_size; j++) begin
-        header[i][j] = tmp_header[447-(i*32)-j];
+        header[i][j] = tmp_header[447-(i*bus_size)-j];
       end
     end
     
@@ -68,8 +63,8 @@ class image;
   endfunction
   
   function print_me;
-    bit [31:0] tmp;
-    $display("Size = %0d", 				size);
+    bit [`DATA_WIDTH-1:0] tmp;
+    $display("Size = %0h", 				size);
     $display("Width = %0d", 			width);
     $display("Height = %0d", 			height);
     $display("Header Dim = %0d, %0d", 	header.size, header[0].size);
@@ -77,7 +72,7 @@ class image;
     // --- print the header values ---
     for (int i=0; i<448 / bus_size; i++) begin
       for (int j=0; j<bus_size; j++) begin
-        tmp[31-j] = header[i][j];
+        tmp[`DATA_WIDTH-j-1] = header[i][j];
       end
       $display("header[%0d] = %0h", 	i, tmp);
     end
