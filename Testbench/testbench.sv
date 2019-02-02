@@ -51,10 +51,10 @@ module testbench;
 
   // reset generation
   initial begin
-    $display("\n---- START OF RESET ----\n");
+    //$display("\n---- START OF RESET ----\n");
     dut_if1.rst_n = 0;
     #6 dut_if1.rst_n = 1;
-    $display("\n---- END OF RESET ----\n");
+    //$display("\n---- END OF RESET ----\n");
   end
   
   initial begin
