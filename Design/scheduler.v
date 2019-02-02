@@ -142,8 +142,7 @@ module scheduler
 	assign fifo_wr 			= ((reset) && (mstr_ready) && (BMPcount < 56)||(vld_pr))? 'b1 : 'b0;
 	
 	// FiFo's rd is on from #DEAD_TIME after end of headers (on TH mode) till FiFo empty
-	// FiFo's rd is on from the beggining of headers (on b mode) till Pix input
-	
+	// FiFo's rd is on from the beggining of headers (on b mode) till Pix input	
 	assign fifo_rd 			= ((mstr_ready) && (reset) && (reg_mode == 2'b01) && (BMPcount > 3 * bytes_per_data) && (!empty))? 'b1: ((mstr_ready) && (reset) && (reg_mode == 2'b10) && (BMPcount < 56))? 'b1: 'b0;
 	
 	/////To The Master/////
@@ -178,8 +177,6 @@ module scheduler
   always @(posedge clk, reset)
 	begin
 	////////reseting first!/////////
-
-
 		if (mstr_ready && reset)
 			begin
 				if (BMPcount < 56) 
@@ -188,15 +185,14 @@ module scheduler
 							begin
 							  #0;
                               BMP[BMPcount] 		= data [(3-counter) * 8 +: 8];
-                              //if (DEBUG) $display("BMP[%0d] = %0h", BMPcount, BMP[BMPcount]);
-								BMPcount 			= BMPcount + 1;
+							  BMPcount 			= BMPcount + 1;
 							end	
 					end
 				if ((BMPcount >= 56) && (BMPcount < file_size + DEAD_TIME))						 
 					begin 
 						BMPcount 				= BMPcount + 4; 
 					end
-				//if (BMPcount >= 56) done = 1;
+
 				if (the_end)
 					begin
 						mstr0_cmplt = 1;
@@ -206,7 +202,6 @@ module scheduler
 						@(posedge clk);
 						rst = 1;						
 					end
-
 			end
 	end
 
