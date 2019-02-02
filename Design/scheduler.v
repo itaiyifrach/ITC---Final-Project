@@ -144,19 +144,24 @@ module scheduler
 	
 	assign slv0_ready = (whos_grt==00 && mstr_ready);
 	assign slv1_ready = (whos_grt==01 && mstr_ready);
-	// assign no_of_last_padded_bytes = (file_size - 56) % DATA_BUS_SIZE;
+
 	assign reset = (mstr0_cmplt)? rst : rst_n;
 
+		always @(clk, reset)
+			begin
+				if (!reset)
+					begin
+						done 					<= 0;
+						mstr0_cmplt				<= 0;
+						BMPcount				<= 0;
+					end
+			end
 ///////////////////////////////////////////////////////////////////////////////	
 	
-  always @(posedge clk)
+  always @(posedge clk, reset)
 	begin
 	////////reseting first!/////////
-		if (!reset)
-			begin
-				done 					<= 0;
-				mstr0_cmplt				<=0;
-			end
+
 
 		if (mstr_ready && reset)
 			begin
@@ -171,18 +176,17 @@ module scheduler
 					end
 				if ((BMPcount >= 56) && (BMPcount < file_size + DEAD_TIME))						 
 					begin 
-						//scheduler_2_proc_vld 	= 0;
 						BMPcount 				= BMPcount + 1;
-						//scheduler_2_proc_vld 	= 1;
 					end
 				if (BMPcount >= file_size) done = 1;
-				if (BMPcount > file_size + DEAD_TIME)
+				if (BMPcount >= file_size + DEAD_TIME)
 					begin
 						mstr0_cmplt = 1;
-						#1;
+						@(posedge clk);
 						rst = 0;
-						#1;
-						rst = 1;
+						mstr0_cmplt = 0;
+						@(posedge clk);
+						rst = 1;						
 					end
 
 			end

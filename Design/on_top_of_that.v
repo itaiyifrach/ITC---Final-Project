@@ -121,7 +121,7 @@ module bmp_arbiterBFF
 		.scheduler_2_proc_vld(scheduler_2_proc_vld),
 		.mode(mode),
 		.data_proc(data_proc),
-		.done(done),	
+		.done(done),
 		//no_of_last_padded_bytes,
 
 		/////master/////

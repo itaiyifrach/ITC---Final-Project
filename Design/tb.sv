@@ -170,7 +170,7 @@ module test;
 			end */
 	
 			slv0_data_valid = 1;
-			
+			slv0_proc_val = 'b1;
 		if (BMPcount >= file_size)
 			
 		$finish;
