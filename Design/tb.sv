@@ -3,12 +3,12 @@
 module test;
   
     parameter DATA_WIDTH 	= 32;
-  	parameter DEBUG			= 0 ;
+  	parameter DEBUG			= 1 ;
 	parameter PERIOD 		= 10;
 	parameter DATA_BUS_SIZE = 32;
 	parameter BYTE			= 8;
 	parameter DEAD_TIME		= 3;
-    parameter MODE			= 2'b01;
+    parameter MODE			= 2'b10;
 	
   logic 					clk 	= 0;
   logic 					rst_n 	= 0;
@@ -45,8 +45,28 @@ module test;
 			slv0_mode = MODE;
 			if (DEBUG) $display("Loading bmp file!\n");
 			$readmemh("C:/Users/Abu Tony/Desktop/X/ITC---Final-Project/Design/export.txt", bmp_data);
+			
+			//wait(!($isunknown({bmp_data[2], bmp_data[3], bmp_data[4], bmp_data[5]})));
+		    
+/* 			file_size = {bmp_data[2], bmp_data[3], bmp_data[4], bmp_data[5]};
+			if (DEBUG) 
+			begin			
+			$display("file size is %d", file_size);
+			end		
+					
+			data_start_pos 	<= {bmp_data[10], bmp_data[11], bmp_data[12], bmp_data[13]};
+			if (DEBUG) $display("data_start_pos = %d\n", data_start_pos);
+			
+			p_width 		<= {bmp_data[18], bmp_data[19], bmp_data[20], bmp_data[21]};
+			if (DEBUG) $display("p_width = %d\n", p_width);
 
-		    file_size <= {bmp_data[5], bmp_data[4], bmp_data[3], bmp_data[2]};
+			p_height 		<= {bmp_data[22], bmp_data[23], bmp_data[24], bmp_data[25]};
+			if (DEBUG) $display("p_height = %d\n", p_height);
+			
+			p_biBitCount 	<= {bmp_data[28], bmp_data[29]};
+			if (DEBUG) $display("p_biBitCount = %d\n", p_biBitCount);
+			 */
+			file_size <= {bmp_data[5], bmp_data[4], bmp_data[3], bmp_data[2]};
 			$display("file size is %d", file_size);
 					
 					
@@ -97,8 +117,9 @@ module test;
     .mstr0_data_valid	(mstr0_data_valid)
      );
   
-  initial begin
-    #150 $finish;
+  initial 
+  begin
+    #350 $finish;
   end
 	
 	//Reset Logic
@@ -127,14 +148,16 @@ module test;
 	//Verification Plan
 	initial 
 	begin
-	#5;
 
 	->reset_trigger;
 	@(reset_done_trigger)
+	
 	if (DEBUG) $display ("Oh my god, its starting");
 	slv0_data_valid = 'b1;
+	slv0_proc_val = 8'h0A;
+
 	while (BMPcount < file_size)
-		@(negedge clk) //write 
+		@(posedge clk) //write 
 		begin
 			counter = 0;
 			//slv0_data_valid = 'b0;
@@ -143,7 +166,7 @@ module test;
 					//slv0_data = {bmp_data[3], bmp_data[2], bmp_data[1], bmp_data[0]};
 					if (DEBUG) $display ("Byte no %d is : %h", BMPcount, bmp_data[BMPcount]);
 
-					slv0_data [(counter * BYTE) +: BYTE] = bmp_data[BMPcount];
+					slv0_data [((3-counter) * BYTE) +: BYTE] = bmp_data[BMPcount];
 					if (DEBUG) $display ("(counter * BYTE) = %d", (counter * BYTE));
 					if (DEBUG) $display ("And yet, This what the DUT got in this round: %h", slv0_data[(counter * BYTE) +: 8]);
 
@@ -169,10 +192,15 @@ module test;
 				counter 			= counter + 1;
 			end */
 	
-			slv0_data_valid = 1;
-			slv0_proc_val = 'b1;
-		if (BMPcount >= file_size)
+			//slv0_data_valid = 1;
 			
+		if (BMPcount >= file_size)
+			begin
+				slv0_data_valid = 0;
+				mstr0_ready = 0;
+				slv0_mode = 2'b11;
+				if (DEBUG) $display("BMPcount =  ", BMPcount);
+			end
 		$finish;
 
 	end
