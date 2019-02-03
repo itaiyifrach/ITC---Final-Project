@@ -118,7 +118,7 @@ module scheduler
 	reg	 [1:0]						reg_mode;							//register to save the mode for when input finished
 	
 	wire [DATA_BUS_SIZE - 1:0]		data;
-	reg 							rst = 0;
+	reg 							rst = 1;
 	reg								the_end;
 	
 	////////Who's the chosen slave /////////
@@ -150,8 +150,8 @@ module scheduler
 	assign mstr0_data_valid = ((mstr_ready) && (reset) && (reg_mode == 2'b01) && (BMPcount > 3 * bytes_per_data) && (fifo_rd))? {whos_grt[0], 1'b1} : ((mstr_ready) && (reset) && (reg_mode == 2'b10) && (vld_pr))? {whos_grt[0], 1'b1} : 'b0;
 	
 	/////// Whats going on in your head???//////
-	assign file_size 		= {BMP[2], BMP[3], BMP[4], BMP[5]};
-	//assign file_size 		= {BMP[5], BMP[4], BMP[3], BMP[2]};
+	//assign file_size 		= {BMP[2], BMP[3], BMP[4], BMP[5]};
+	assign file_size 		= {BMP[5], BMP[4], BMP[3], BMP[2]};
 	assign mstr_ready 		= (slv0_data_valid || slv1_data_valid)? mstr0_ready:'b0; //if nothing is valid, dont do it	
 	
 	assign slv0_ready = (whos_grt==2'b00);
@@ -160,7 +160,7 @@ module scheduler
 	assign reset = (mstr0_cmplt)? rst : rst_n;
 
 	assign the_end = ((reg_mode == 2'b10) && (BMPcount >= file_size))? 1'b1 :  ((reg_mode == 2'b01) && (BMPcount >= file_size + DEAD_TIME))? 1'b1 : 1'b0;
-	
+	assign mstr0_cmplt = the_end;
 	assign reg_mode = (!done)? mode : reg_mode;
 
 	
@@ -168,8 +168,8 @@ module scheduler
 			begin
 				if (!reset)
 					begin
-						mstr0_cmplt				<= 0;
 						BMPcount				<= 0;
+						rst						<= 1;
 					end
 			end
 ///////////////////////////////////////////////////////////////////////////////	
@@ -192,16 +192,12 @@ module scheduler
 					begin 
 						BMPcount 				= BMPcount + bytes_per_data; 
 					end
-
-				if (the_end)
-					begin
-						mstr0_cmplt = 1;
-						@(posedge clk);
-						rst = 0;
-						mstr0_cmplt = 0;
-						@(posedge clk);
-						rst = 1;						
-					end
+					
+						if (mstr0_cmplt) 
+							begin
+								$display ( "master completed!! @ %t ", $time);
+								rst = 0;
+							end
 			end
 	end
 

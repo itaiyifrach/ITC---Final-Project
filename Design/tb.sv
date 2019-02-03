@@ -164,12 +164,14 @@ module test;
 			
 		if (BMPcount >= file_size)
 			begin
+				#10;
 				slv0_data_valid = 0;
 				mstr0_ready = 0;
 				slv0_mode = 2'b11;
 				if (DEBUG) $display("BMPcount =  ", BMPcount);
+				$finish;
+
 			end
-		$finish;
 
 	end
 endmodule
