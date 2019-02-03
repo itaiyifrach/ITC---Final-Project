@@ -150,8 +150,8 @@ module scheduler
 	assign mstr0_data_valid = ((mstr_ready) && (reset) && (reg_mode == 2'b01) && (BMPcount > 3 * bytes_per_data) && (fifo_rd))? {whos_grt[0], 1'b1} : ((mstr_ready) && (reset) && (reg_mode == 2'b10) && (vld_pr))? {whos_grt[0], 1'b1} : 'b0;
 	
 	/////// Whats going on in your head???//////
-	//assign file_size 		= {BMP[2], BMP[3], BMP[4], BMP[5]};
-	assign file_size 		= {BMP[5], BMP[4], BMP[3], BMP[2]};
+	assign file_size 		= {BMP[2], BMP[3], BMP[4], BMP[5]};
+	//assign file_size 		= {BMP[5], BMP[4], BMP[3], BMP[2]};
 	assign mstr_ready 		= (slv0_data_valid || slv1_data_valid)? mstr0_ready:'b0; //if nothing is valid, dont do it	
 	
 	assign slv0_ready = (whos_grt==2'b00);
@@ -190,7 +190,7 @@ module scheduler
 					end
 				if ((BMPcount >= 56) && (BMPcount < file_size + DEAD_TIME))						 
 					begin 
-						BMPcount 				= BMPcount + 4; 
+						BMPcount 				= BMPcount + bytes_per_data; 
 					end
 
 				if (the_end)
