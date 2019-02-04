@@ -24,55 +24,50 @@ module FiFo
 	output reg empt;
 	output reg full;
 	
-	wire NOA = 2**Addr_Width; //MAX No of words FiFo can store
-	wire next_rd = (rd);
-	wire next_wr = (wr);
 	
 	wire rd_en;
 	wire wr_en;
 	
-	wire  [Addr_Width-1:0] no_of_stored_data;
-	//reg [Addr_Width-1:0] no_of_stored_data;
 
     reg  [Data_Width-1:0]mem[2**Addr_Width-1:0];
     reg  [Addr_Width:0]rd_addr_pos 	= 'd0;
     reg  [Addr_Width:0]wr_addr_pos 	= 'd0;
 
-    integer i;
+    integer i = 0;
 
-	assign empt  = (rd_addr_pos == wr_addr_pos)? 'd1:'d0;
-	assign full  = ((rd_addr_pos[Addr_Width-1:0] == wr_addr_pos[Addr_Width-1:0])&& !empt)? 'd1:'d0;
+	assign empt  = (rd_addr_pos == wr_addr_pos);
+	assign full  = ((rd_addr_pos[Addr_Width-1:0] == wr_addr_pos[Addr_Width-1:0]) && (rd_addr_pos[Addr_Width] != wr_addr_pos[Addr_Width]) );
 	
-	assign no_of_stored_data 	= (wr_addr_pos [Addr_Width-1:0] - rd_addr_pos [Addr_Width-1:0])%8;
-	assign rd_en 				= rd && !empt;
-	assign wr_en 				= wr && !full;
+	assign rd_en = (rd && !empt)||(rd && wr);
+	assign wr_en = (wr && !full)||(rd && wr);
 
       
-	always@(posedge clk, posedge rst)
+	always@(posedge clk, negedge rst)
 	begin
 		if (!rst)
 			begin
 				data_out 	<= 'd0;
-				rd_addr_pos <= 0;
-				wr_addr_pos <= 0;
+				rd_addr_pos <= 'd0;
+				wr_addr_pos <= 'd0;
 				for (i=0;i<2**Addr_Width ;i=i+1)
 					begin
-						mem[i] <= 0;
+						mem[i] <= 'd0;
 					end
 			end
 		else
-			begin				
-              if (rd_en)			//Read Operation
-					begin
-						data_out 	<= mem [rd_addr_pos[Addr_Width-1:0]];
-						rd_addr_pos <= rd_addr_pos + 'd1;
-                        
-					end
-				if (wr_en)			//Write Operation
-					begin
-						mem [wr_addr_pos[Addr_Width-1:0]] <= data_in;
-						wr_addr_pos 	  <= wr_addr_pos + 'd1;
-					end
+			begin
+			if (wr_en)			//Write Operation
+				begin
+					mem [wr_addr_pos[Addr_Width-1:0]] 	<= data_in;
+					wr_addr_pos 	  					<= wr_addr_pos + 'd1;
+				end			
+			if (rd_en)			//Read Operation
+				begin
+					data_out 							<= mem [rd_addr_pos[Addr_Width-1:0]];
+					rd_addr_pos 						<= rd_addr_pos + 'd1;
+					
+				end
+
 			end
 	end
 	endmodule

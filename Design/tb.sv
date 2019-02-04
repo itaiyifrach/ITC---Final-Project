@@ -46,7 +46,7 @@ module test;
 			if (DEBUG) $display("Loading bmp file!\n");
 			$readmemh("C:/Users/Abu Tony/Desktop/X/ITC---Final-Project/Design/export.txt", bmp_data);
 			#0;
-			file_size <= {bmp_data[5], bmp_data[4], bmp_data[3], bmp_data[2]};
+			file_size = {bmp_data[5], bmp_data[4], bmp_data[3], bmp_data[2]};
 			$display("file size is %d", file_size);
 					
 					
@@ -137,7 +137,7 @@ module test;
 	slv0_proc_val = 8'h0A;
 
 	while (BMPcount < file_size)
-		@(posedge clk) //write 
+		@(negedge clk) //write 
 		begin
 			counter = 0;
 
