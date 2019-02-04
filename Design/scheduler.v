@@ -151,7 +151,7 @@ module scheduler
 	
 	/////To The Master/////
 	assign data_to_master	= (reg_mode[1] && (BMPcount > 56))? data_from_processor : data_from_fifo;
-	assign mstr0_data_valid = ((mstr_ready) && (reset) && (reg_mode == 2'b01) && (BMPcount > 3 * BYTES_PER_DATA) && (fifo_rd))? {whos_grt[0], 1'b1} : ((mstr_ready) && (reset) && (reg_mode == 2'b10) && (vld_pr))? {whos_grt[0], 1'b1} : 'b0;
+	assign mstr0_data_valid = ((mstr_ready) && (reset) && (reg_mode == 2'b01) && (BMPcount > 3 * BYTES_PER_DATA) && (fifo_rd))? {whos_grt[0], 1'b1} : ((mstr_ready) && (reset) && (reg_mode == 2'b10))? {whos_grt[0], 1'b1} : 'b0;
 	
 	/////// Whats going on in your head???//////
 	//assign file_size 		= {BMP[2], BMP[3], BMP[4], BMP[5]};
