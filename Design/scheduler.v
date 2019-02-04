@@ -147,7 +147,7 @@ module scheduler
 	
 	// FiFo's rd is on from #DEAD_TIME after end of headers (on TH mode) till FiFo empty
 	// FiFo's rd is on from the beggining of headers (on b mode) till Pix input	
-	assign fifo_rd 			= ((slv0_ready || slv1_ready) && (reset) && (reg_mode == 2'b01) && (BMPcount > 3 * BYTES_PER_DATA) && (!empty))? 'b1: (((slv0_ready || slv1_ready)) && (rst_n) && (mode == 2'b10) && (BMPcount > 0) && (BMPcount < 61))? 'b1: 'b0;
+	assign fifo_rd 			= ((slv0_ready || slv1_ready) && (reset) && (reg_mode == 2'b01) && (BMPcount > 3 * BYTES_PER_DATA) && (!empty))? 'b1: (((slv0_ready || slv1_ready)) && (rst_n) && (mode == 2'b10) && (BMPcount > 0) && (!vld_pr))? 'b1: 'b0;
 	
 	/////To The Master/////
 	assign data_to_master	= (reg_mode[1] && (BMPcount > 56))? data_from_processor : data_from_fifo;
@@ -180,6 +180,11 @@ module scheduler
 		begin
 			if (mstr_ready)
 				begin
+					if ((BMPcount >= 56) && (BMPcount < file_size + DEAD_TIME))						 
+						begin 
+							BMPcount 				= BMPcount + BYTES_PER_DATA; 
+						end
+					
 					if (BMPcount < 56) 
 						begin
 							for (counter = 0; counter < BYTES_PER_DATA; counter=counter+1)
@@ -188,10 +193,7 @@ module scheduler
 								BMPcount 			= BMPcount + 1;
 								end	
 						end
-					if ((BMPcount >= 56) && (BMPcount < file_size + DEAD_TIME))						 
-						begin 
-							BMPcount 				= BMPcount + BYTES_PER_DATA; 
-						end
+						
 					if (mstr0_cmplt) 
 						begin
 							$display ( "master completed!! @ %t ", $time);

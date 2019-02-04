@@ -134,7 +134,7 @@ module test;
 	
 	if (DEBUG) $display ("Oh my god, its starting");
 	slv0_data_valid = 'b1;
-	slv0_proc_val = 8'h0A;
+	slv0_proc_val = 8'h0;
 
 	while (BMPcount < file_size)
 		@(negedge clk) //write 
