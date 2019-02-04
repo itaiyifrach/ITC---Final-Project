@@ -42,15 +42,15 @@ class slave_driver extends uvm_driver#(slave_transaction);
         /*if (done_with_pxls) begin
           disable transaction_driver;
         end*/
-        $display("enter while");
-        @(posedge dut_vi.clk) begin
+        //$display("enter while");
+        @(negedge dut_vi.clk) begin
         if (slave_id == 1) dut_vi.slv1_mode	= req.mode; else dut_vi.slv0_mode = req.mode;
         if (slave_id == 1) dut_vi.slv1_proc_val	= req.proc_val; else dut_vi.slv0_proc_val = req.proc_val;
         granted = (slave_id == 0 && dut_vi.slv0_rdy) || (slave_id == 1 && dut_vi.slv1_rdy);
-          $display("granted = %0b", granted);
+          //$display("granted = %0b", granted);
         // if granted, then start driving the image
         if (granted) begin
-          $display("in granted");
+          //$display("in granted");
           if (slave_id == 1) dut_vi.slv1_data_valid = 1; else dut_vi.slv0_data_valid = 1;	// set valid up
           data_ptr = done_with_hdr ? req.img.pixels : req.img.header;
           
@@ -60,17 +60,17 @@ class slave_driver extends uvm_driver#(slave_transaction);
           end
           
           // now drive it and increment data_idx
-          if (slave_id == 1) dut_vi.slv1_data = data_in; else dut_vi.slv1_data = data_in;
+          if (slave_id == 1) dut_vi.slv1_data = data_in; else dut_vi.slv0_data = data_in;
           data_idx++;
           
           // checker if done to drive the header and pixels
           if (!done_with_hdr && data_idx == hdr_size) begin
-            $display("in done with header");
+            //$display("in done with header");
             done_with_hdr 	= 1;
             data_idx 		= 0;
           end
           if (done_with_hdr && data_idx == pxls_size) begin
-            $display("in done with pixels");
+            //$display("in done with pixels");
           	done_with_pxls 	= 1;
             data_idx 		= 0;
           end
