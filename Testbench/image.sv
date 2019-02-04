@@ -8,8 +8,8 @@ class image;
   int bus_size;						// bus size (32 or 64)
 
   constraint size_con {
-    width  inside {[8:100]};
-    height inside {[8:100]};
+    width  inside {[8:10]};
+    height inside {[8:10]};
     size == (width * height * 3) + 56;
   }
   
@@ -24,7 +24,7 @@ class image;
     void'(this.randomize());
     
     // init the pixel size
-    pixels = new[size / bus_size];
+    pixels = new[(size - 56) * 8 / bus_size];
     foreach (pixels[i]) pixels[i] = new[bus_size];
     
     // randomize the pixels
