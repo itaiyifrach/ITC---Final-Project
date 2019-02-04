@@ -45,22 +45,22 @@ module test;
 			slv0_mode = MODE;
 			if (DEBUG) $display("Loading bmp file!\n");
 			$readmemh("C:/Users/Abu Tony/Desktop/X/ITC---Final-Project/Design/export.txt", bmp_data);
-
-			file_size <= {bmp_data[5], bmp_data[4], bmp_data[3], bmp_data[2]};
+			#0;
+			file_size = {bmp_data[5], bmp_data[4], bmp_data[3], bmp_data[2]};
 			$display("file size is %d", file_size);
 					
 					
-			data_start_pos 	<= {bmp_data[13], bmp_data[12], bmp_data[11], bmp_data[10]};
-			if (DEBUG) $display("data_start_pos = %d\n", data_start_pos);
+			// data_start_pos 	<= {bmp_data[13], bmp_data[12], bmp_data[11], bmp_data[10]};
+			// if (DEBUG) $display("data_start_pos = %d\n", data_start_pos);
 			
-			p_width 		<= {bmp_data[21], bmp_data[20], bmp_data[19], bmp_data[18]};
-			if (DEBUG) $display("p_width = %d\n", p_width);
+			// p_width 		<= {bmp_data[21], bmp_data[20], bmp_data[19], bmp_data[18]};
+			// if (DEBUG) $display("p_width = %d\n", p_width);
 
-			p_height 		<= {bmp_data[25], bmp_data[24], bmp_data[23], bmp_data[22]};
-			if (DEBUG) $display("p_height = %d\n", p_height);
+			// p_height 		<= {bmp_data[25], bmp_data[24], bmp_data[23], bmp_data[22]};
+			// if (DEBUG) $display("p_height = %d\n", p_height);
 			
-			p_biBitCount 	<= {bmp_data[29], bmp_data[28]};
-			if (DEBUG) $display("p_biBitCount = %d\n", p_biBitCount);
+			// p_biBitCount 	<= {bmp_data[29], bmp_data[28]};
+			// if (DEBUG) $display("p_biBitCount = %d\n", p_biBitCount);
 			//	end
 			//slv0_data = {bmp_data[3], bmp_data[2], bmp_data[1], bmp_data[0]};
 		end
@@ -128,7 +128,7 @@ module test;
 	//Verification Plan
 	initial 
 	begin
-
+	#2
 	->reset_trigger;
 	@(reset_done_trigger)
 	
@@ -137,7 +137,7 @@ module test;
 	slv0_proc_val = 8'h0A;
 
 	while (BMPcount < file_size)
-		@(posedge clk) //write 
+		@(negedge clk) //write 
 		begin
 			counter = 0;
 
@@ -164,12 +164,14 @@ module test;
 			
 		if (BMPcount >= file_size)
 			begin
+				#10;
 				slv0_data_valid = 0;
 				mstr0_ready = 0;
 				slv0_mode = 2'b11;
 				if (DEBUG) $display("BMPcount =  ", BMPcount);
+				$finish;
+
 			end
-		$finish;
 
 	end
 endmodule
