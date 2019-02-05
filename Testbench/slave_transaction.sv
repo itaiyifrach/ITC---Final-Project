@@ -38,4 +38,5 @@ class slave_transaction extends uvm_sequence_item;
     $display("-------------------");
   endfunction : print
   
+  
 endclass

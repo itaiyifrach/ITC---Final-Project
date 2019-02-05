@@ -19,7 +19,31 @@ class scoreboard extends uvm_scoreboard;
   logic [31:0] 				file_size;
   int 						bytes_per_bus;
   
-  
+    	covergroup Scens_From_A_ScoreBoard @(posedge clk);
+		
+		SLV0s:  coverpoint actual_trans.slv0_rdy;
+		SLV1s:  coverpoint actual_trans.slv1_rdy;
+		
+/* 		SIZEs: coverpoint file_size {
+			bins file_sizes = {56,59, 62, 65, [66:100], [101:10000]};}
+			{ */
+		DATA0s: coverpoint actual_trans.slv0_proc_val {
+			bins Zeroz = {'h0};
+			bins Ones  = {8'hFF};
+			bins NeGs  = {[8'b10000000 : 8'b11111111:]};
+			bins POSs  = {[8'b00000000:8'b01111111]};
+			}
+		DATA1s: coverpoint actual_trans.slv1_proc_val {
+			bins Zeroz = {'h0};
+			bins Ones  = {8'hFF};
+			bins NeGs  = {[8'b10000000 : 8'b11111111:]};
+			bins POSs  = {[8'b00000000:8'b01111111]};
+			}			
+		cross SLV0s, SLV1s, DATA1s, DATA0s;
+		
+	endgroup
+	
+	
   function new(string name, uvm_component parent);
     super.new(name, parent);
     bytes_per_bus = `DATA_WIDTH / `COLOR_SIZE;
@@ -32,6 +56,7 @@ class scoreboard extends uvm_scoreboard;
     scb_export_expected = new("scb_export_expected", this);
 	actual_fifo = new("actual_fifo", this);
 	expected_fifo = new("expected_fifo", this);
+	Scens_From_A_ScoreBoard s = new();
   endfunction
   
   
@@ -88,7 +113,10 @@ class scoreboard extends uvm_scoreboard;
       end
       
     end		// end of forever
-    
+	
+  		s.sample();  
+	
+	
   endtask
   
   

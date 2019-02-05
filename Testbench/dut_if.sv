@@ -16,9 +16,5 @@ interface dut_if;
   logic 						mstr0_ready;
   logic [`DATA_WIDTH-1:0] 		mstr0_data;
   logic [1:0] 					mstr0_data_valid;
-
-	Scens_From_A_Memory cb;
-	
-	cb.sample()
 	
 endinterface
