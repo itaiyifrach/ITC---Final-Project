@@ -39,7 +39,7 @@ initial
 	begin
 		Scens_From_A_Memory = new();
 	end
-		Scens_From_A_Memory[i].sample();
+		Scens_From_A_Memory.sample();
 
 end	
 	
