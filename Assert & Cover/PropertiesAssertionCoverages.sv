@@ -133,7 +133,7 @@ cover  (reset_at_proc_fn);
 		// bins file_sizes = {56,59, 62, 65, 66:100, 101:10000};
 // endgroup
 
-covergroup Scens_From_A_Memory;
+covergroup Scens_From_A_Memory @(posedge clk);;
 	
 	SLVs:  coverpoint whos_grt;
 	
