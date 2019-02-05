@@ -45,7 +45,7 @@ module scheduler
 		mstr0_cmplt,
 	);
 	
-	parameter  DEBUG 			= 1;
+	parameter  DEBUG 			= 0;
 	parameter  DATA_BUS_SIZE 	= 32;
 	parameter  DEAD_TIME 		= 3;
 	parameter  MAX_FILE_SIZE 	= 1000000; //max bytes in file
@@ -165,7 +165,105 @@ module scheduler
 	assign reg_mode = (!done)? mode : reg_mode;
 
 	
-		
+	////////EVENTIM/Status Cases/////////
+
+// request of slv x - $rose($onehot(mode) && slvx_valid)
+sequence slv0_req;
+	$rose($onehot0(mode) && slv0_data_valid);
+endsequence
+
+sequence slv1_req;
+	$rose($onehot0(mode) && slv1_data_valid);
+endsequence
+
+// grant to slv x - not nececerily started
+sequence slv0_grt;
+	$rose(slv0_ready);
+endsequence
+
+sequence slv1_grt;
+	$rose(slv1_ready);
+endsequence
+
+//slvx started
+sequence slv0_st;
+	$rose(slv0_ready && slv0_data_valid && mstr0_ready);
+endsequence
+
+sequence slv1_st;
+	$rose(slv1_ready && slv1_data_valid && mstr0_ready);
+endsequence
+
+//start master outputing event - $rose(mstr0_data_valid)
+sequence mst0_start_outputting;
+	$rose(mstr0_data_valid);
+endsequence
+
+// finish master outputing event - $fell(mstr0_data_valid)
+sequence mst0_finish_outputting;
+	$fell(mstr0_data_valid);
+endsequence
+
+//start outputting to the processor - $rose(scheduler_2_proc_vld)
+sequence start_processing;
+	$rose(scheduler_2_proc_vld);
+endsequence
+
+//finish outputting to the processor - $fell(scheduler_2_proc_vld)
+sequence finish_processing;
+	$fell(scheduler_2_proc_vld);
+endsequence
+
+//slvx started in TH mode - $rose(whos_grt==x && mstr_ready && 01)
+sequence slv0_th_mode;
+	$rose(whos_grt==00 && mstr_ready && slv0_mode == 01 && slv0_data_valid);
+endsequence
+
+sequence slv1_th_mode;
+	$rose(whos_grt==01 && mstr_ready && slv1_mode == 01 && slv1_data_valid);
+endsequence
+
+//slvx granted in B mode - $rose(whos_grt==x && mstr_ready && 10)
+sequence slv0_b_mode;
+	$rose(whos_grt==00 && mstr_ready && slv0_mode == 10&& slv0_data_valid);
+endsequence
+
+sequence slv1_b_mode;
+	$rose(whos_grt==01 && mstr_ready && slv1_mode == 10&& slv1_data_valid);
+endsequence
+
+
+//slv drop its vld before completion
+sequence slv_pause;
+	$rose(mstr_ready && !mstr0_ready);
+endsequence
+
+/* 1. If any of the slv  valid is on than its mode should be 01 or 10
+ */
+property vld0_mode;
+ @(posedge clk)
+ $rose(slv0_data_valid) |-> $onehot0(slv0_mode);
+endproperty 
+
+
+property vld1_mode;
+ @(posedge clk)
+ $rose(slv1_data_valid) |-> $onehot0(slv1_mode);
+endproperty 
+
+
+//if (slv0_req && slv0_data_vld), than it will get grant some time in the future
+property 	granting;
+	@(posedge clk)
+		$rose($onehot0(mode) && slv0_data_valid) [*1:$] ##[0:$] $rose(whos_grt==00 && mstr_ready);
+endproperty 
+
+
+/* //Not fairness - if slv 0 granted, and its valid high than next grant should be gnt[0]
+property 	not_fairness;
+	@(posedge clk)
+		slv0_req |-> ##[0:$]((slv0_grt) throughout slv1_grt[->2]);
+endproperty  */		
 
 ///////////////////////////////////////////////////////////////////////////////	
 	
@@ -200,7 +298,21 @@ module scheduler
 							rst = 0;
 						end
 				end
+			assert  property(vld0_mode);
+			cover   property(vld0_mode);
+			
+			assert  property(vld1_mode);
+			cover   property(vld1_mode);
+			
+			assert  property(granting);
+			cover   property(granting);
+			
+/* 			assert  property(not_fairness);
+			cover   property(not_fairness);	 */
+			
 		end
+
+
 
 endmodule
 	

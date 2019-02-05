@@ -3,7 +3,7 @@
 module test;
   
     parameter DATA_WIDTH 	= 32;
-  	parameter DEBUG			= 1 ;
+  	parameter DEBUG			= 0 ;
 	parameter PERIOD 		= 10;
 	parameter DATA_BUS_SIZE = 32;
 	parameter BYTE			= 8;
