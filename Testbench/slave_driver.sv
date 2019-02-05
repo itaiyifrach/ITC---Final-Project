@@ -23,11 +23,13 @@ class slave_driver extends uvm_driver#(slave_transaction);
     int 	hdr_size, pxls_size;			// header and pixels array size
     bit 	done_with_hdr, done_with_pxls, granted;
     logic 	[`DATA_WIDTH-1:0]	data_in;
+
     
     forever begin
       // get next transaction
       seq_item_port.get_next_item(req);
-      $display("new trans recieved");
+      $display("new trans recieved:");
+      req.print(slave_id);
       // set helpful variables
       data_idx			 	= 0;
       done_with_hdr			= 0;
@@ -35,7 +37,17 @@ class slave_driver extends uvm_driver#(slave_transaction);
       granted				= 0;
       hdr_size 				= $size(req.img.header);
       pxls_size 			= $size(req.img.pixels);
+
       
+      if ((slave_id == 0 && req.mode != 2'b01 && req.mode != 2'b10) || (slave_id == 1 && req.mode != 2'b01 && req.mode != 2'b10)) begin
+        repeat (req.data_valid_stop_for) @(negedge dut_vi.clk) begin
+          if (slave_id == 1) dut_vi.slv1_mode = req.mode; else dut_vi.slv0_mode = req.mode;
+          if (slave_id == 1) dut_vi.slv1_proc_val = 0; else dut_vi.slv0_proc_val = 0;
+          if (slave_id == 1) dut_vi.slv1_data_valid = 0; else dut_vi.slv0_data_valid = 0;
+          if (slave_id == 1) dut_vi.slv1_data = 0; else dut_vi.slv0_data = 0;
+        end
+      end
+      else begin
 		
       //always @(posedge dut_vi.clk) begin
       while (!done_with_pxls) begin
@@ -76,11 +88,11 @@ class slave_driver extends uvm_driver#(slave_transaction);
           end
         end
         end
-      end	// end of always block
-      
+      end	// end of while
+      end
       seq_item_port.item_done();
       $display("trans done");
-    end
+    end		// end of forever block
   endtask
   
   

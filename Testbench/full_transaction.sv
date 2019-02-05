@@ -31,19 +31,17 @@ class full_transaction extends uvm_sequence_item;
     $display("slv0_data = %0h", 		slv0_data);
     $display("slv0_rdy = %0b", 			slv0_rdy);
 
-    
-    $display("\n ---- Slave 1 ----");
+    $display("---- Slave 1 ----");
     $display("slv1_mode = %0b", 		slv1_mode);
     $display("slv1_data_valid = %0b", 	slv1_data_valid);
     $display("slv1_proc_val = %0h", 	slv1_proc_val);
-    $display("slv0_data = %0h", 		slv1_data);
+    $display("slv1_data = %0h", 		slv1_data);
     $display("slv1_rdy = %0b", 			slv1_rdy);
-
     
-    $display("\n ---- Master 0 ----");
+    $display("---- Master 0 ----");
     $display("mstr0_cmplt = %0b", 			mstr0_cmplt);
     $display("mstr0_ready = %0b", 			mstr0_ready);
-    $display("mstr0_data = %0b", 			mstr0_data);
+    $display("mstr0_data = %0h", 			mstr0_data);
     $display("mstr0_data_valid = %0b", 		mstr0_data_valid);
   endfunction : print
   

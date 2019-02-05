@@ -30,8 +30,8 @@ class env extends uvm_env;
   
   
   function void connect_phase(uvm_phase phase);
-	active_agent_h.monitor_h.aport.connect(scoreboard_h.scb_actual);
-	passive_agent_h.exp_monitor_h.aport.connect(scoreboard_h.scb_expected);
+	active_agent_h.aport.connect(scoreboard_h.scb_export_actual);
+    passive_agent_h.aport.connect(scoreboard_h.scb_export_expected);
 	//active_agent_h.monitor_h.put_port.connect(actual_fifo.put_export);
 	//passive_agent_h.exp_monitor_h.put_port.connect(expected_fifo.put_export);
 	//scoreboard_h.actual_get_port.connect(actual_fifo.get_export);
