@@ -8,7 +8,7 @@
 class active_agent extends uvm_agent;
   
   `uvm_component_utils(active_agent)
-  //uvm_analysis_port#(my_transaction) aport;
+  uvm_analysis_port#(full_transaction) aport;
   
   // slave 0
   slave_sequencer 	slv0_seq;
@@ -32,7 +32,7 @@ class active_agent extends uvm_agent;
   
   
   function void build_phase(uvm_phase phase);
-	//aport = new("aport", this);
+	aport = new("aport", this);
     slv0_seq 	= slave_sequencer::type_id::create("slv0_seq", this);
     slv0_drv 	= slave_driver::type_id::create("slv0_drv", this);
     slv1_seq 	= slave_sequencer::type_id::create("slv1_seq", this);
@@ -47,7 +47,7 @@ class active_agent extends uvm_agent;
     slv0_drv.seq_item_port.connect(slv0_seq.seq_item_export);	// connect slave0 seq to it's driver
     slv1_drv.seq_item_port.connect(slv1_seq.seq_item_export);	// connect slave1 seq to it's driver
     mstr0_drv.seq_item_port.connect(mstr0_seq.seq_item_export);	// connect master seq to it's driver
-	//my_monitor_h.aport.connect(aport);							// connect monitor to port (for scoreboard use)
+	monitor_h.aport.connect(aport);							// connect monitor to port (for scoreboard use)
   endfunction
   
   

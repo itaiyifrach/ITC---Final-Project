@@ -9,11 +9,13 @@ class slave_transaction extends uvm_sequence_item;
   rand logic 						rdy;
   rand logic						data_valid_stop;
   rand int							data_valid_stop_for;
+  rand int							data_stop_at;
   image 							img;
   
   
   constraint stops_con {
     data_valid_stop_for inside {[1:10]};
+    proc_val			inside {[1:50]};
   }
   
   function new(string name="");
@@ -26,12 +28,14 @@ class slave_transaction extends uvm_sequence_item;
   
   
   function void print(int id);
-    $display("\n ---- Slave %0d ----",		id);
+    $display("\n---- Slave %0d ----",		id);
     $display("mode = %0b", 					mode);
     $display("proc_val = %0h", 				proc_val);
     $display("rdy = %0b", 					rdy);
     $display("data_valid_stop = %0d", 		data_valid_stop);
     $display("data_valid_stop_for = %0d", 	data_valid_stop_for);
+    void'(img.print_me());
+    $display("-------------------");
   endfunction : print
   
 endclass

@@ -20,7 +20,7 @@ module testbench;
   
   initial begin
     $dumpfile("dump.vcd");
-    $dumpvars;
+    $dumpvars(0);
   end
   
   dut_if dut_if1();
